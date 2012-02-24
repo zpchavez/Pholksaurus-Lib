@@ -69,16 +69,16 @@ class Term
     protected $_useTerms = array();
 
     /**
-     * @var RequestMaker
+     * @var RequestExecutor
      */
-    protected $_requestMaker;
+    protected $_rex;
 
     /**
      * @var array $values  The array encoded in the JSON returned by
      *                     a get term request.
-     * @param RequestMaker $requestMaker
+     * @param RequestExecutor $rex
      */
-    public function __construct(array $values, RequestMaker $requestMaker)
+    public function __construct(array $values, RequestExecutor $rex)
     {
         $this->_id        = $values['id'];
         $this->_name      = $values['name'];
@@ -87,31 +87,31 @@ class Term
         foreach ($values['broader'] as $broader) {
             $this->_broaderTerms[] = new TermSummary(
                 $broader,
-                $requestMaker
+                $rex
             );
         }
         foreach ($values['narrower'] as $narrower) {
             $this->_narrowerTerms[] = new TermSummary(
                 $narrower,
-                $requestMaker
+                $rex
             );
         }
         foreach ($values['related'] as $related) {
-            $this->_relatedTerms[] = new TermSummary(                
+            $this->_relatedTerms[] = new TermSummary(
                 $related,
-                $requestMaker
+                $rex
             );
         }
         foreach ($values['used_for'] as $usedFor) {
             $this->_usedForTerms[] = new TermSummary(
                 $usedFor,
-                $requestMaker
+                $rex
             );
         }
         foreach ($values['use'] as $use) {
             $this->_useTerms[] = new TermSummary(
                 $use,
-                $requestMaker
+                $rex
             );
         }
     }
@@ -179,7 +179,7 @@ class Term
         $allTerms = array_merge(
             $this->getBroaderTerms(),
             $this->getNarrowerTerms(),
-            $this->getRelatedTerms(),            
+            $this->getRelatedTerms(),
             $this->getUsedForTerms()
         );
         return $allTerms ? self::STATUS_PREFERRED : self::STATUS_UNSORTED;
@@ -209,14 +209,14 @@ class Term
     {
         if ($this->getStatus() != self::STATUS_NONPREFERRED) {
             return $this;
-        }        
+        }
         $useTerms = $this->getUse();
         if (count($useTerms) == 1) {
-            return $this->_requestMaker->getById($useTerms[0]['id']);
+            return $this->_rex->getById($useTerms[0]['id']);
         }
         $preferredTerms = array();
         foreach ($useTerms as $useTerm) {
-            $preferredTerms[] = $this->_requestMaker->getById(
+            $preferredTerms[] = $this->_rex->getById(
                 $useTerm[0]['id']
             );
         }

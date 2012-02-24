@@ -9,7 +9,7 @@ require_once 'responseCodeMessages.php';
 /**
  * Class for making requests to and receiving responses from Folksaurus.
  */
-class RequestMaker
+class RequestExecutor
 {
     /**
      * The API key assigned to the app for which requests are made.
@@ -20,18 +20,18 @@ class RequestMaker
 
     /**
      * The base URL to which requests will be made.
-     * 
+     *
      * @var string
      */
     protected $_url;
-    
+
     /**
      * The latest response code received by this object.
-     * 
+     *
      * @var int
      */
     protected $_latestResponseCode;
-    
+
     /**
      * Constructor
      *
@@ -68,7 +68,7 @@ class RequestMaker
     }
 
     /**
-     * Add the specified headers plus the authorization header to the handle.    
+     * Add the specified headers plus the authorization header to the handle.
      *
      * @param resource $handle  A cURL handle.
      * @param array $headers
@@ -100,10 +100,10 @@ class RequestMaker
      */
     protected function _executeGetRequest($uri)
     {
-        $handle = curl_init($uri);        
+        $handle = curl_init($uri);
         curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-        $handle = $this->_addHeaders($handle);        
-        $response = curl_exec($handle);        
+        $handle = $this->_addHeaders($handle);
+        $response = curl_exec($handle);
         $responseCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
         $this->_latestResponseCode = $responseCode;
         curl_close($handle);
@@ -130,11 +130,11 @@ class RequestMaker
      * @return array
      */
     public function getByName($name)
-    {        
+    {
         $uri = sprintf(
             '%s/api/term/%s/',
             $this->_url,
-            rawurlencode($name)            
+            rawurlencode($name)
         );
         $termArray = $this->_executeGetRequest($uri);
         if (!$termArray) {
@@ -163,8 +163,8 @@ class RequestMaker
         curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
         $handle = $this->_addHeaders($handle, array('Content-Length: 0'));
         curl_setopt($handle, CURLOPT_POSTFIELDS, '');
-        $response = curl_exec($handle);        
-        $this->_latestResponseCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);        
+        $response = curl_exec($handle);
+        $this->_latestResponseCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
         return $response;
     }
 
@@ -180,7 +180,7 @@ class RequestMaker
         $term = $this->getByName($name);
         if ($term) {
             return $term;
-        }        
+        }
         $id = $this->createByName($name);
         if ($id) {
             return $this->getById($id);
@@ -203,7 +203,7 @@ class RequestMaker
             $this->_url,
             rawurlencode($query),
             $limit
-        );        
+        );
         $termArrays = $this->_executeGetRequest($uri);
         $termList = array();
         foreach ($termArrays as $termArray) {

@@ -25,21 +25,21 @@ class TermSummary
     protected $_name;
 
     /**
-     * @var RequestMaker
+     * @var RequestExecutor
      */
-    protected $_requestMaker;
+    protected $_rex;
 
     /**
      * Constructor.
-     *     
+     *
      * @param array $values  An array with keys "id" and "name".
-     * @param RequestMaker $requestMaker
+     * @param RequestExecutor $rex
      */
-    public function __construct(array $values, RequestMaker $requestMaker)
+    public function __construct(array $values, RequestExecutor $rex)
     {
         $this->_id   = $values['id'];
         $this->_name = $values['name'];
-        $this->_requestMaker = $requestMaker;
+        $this->_rex  = $rex;
     }
 
     /**
@@ -49,7 +49,7 @@ class TermSummary
      */
     public function getCompleteTerm()
     {
-        return $this->_requestMaker->getById($this->_id);
+        return $this->_rex->getById($this->_id);
     }
 
     public function __toString()
