@@ -52,6 +52,32 @@ class TermSummary
         return $this->_rex->getById($this->_id);
     }
 
+    /**
+     * Get the name.
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->_name;
+    }
+
+    /**
+     * Get the ID.
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->_id;
+    }
+
+
+    /**
+     * Get the name.
+     *
+     * @return string
+     */
     public function __toString()
     {
         return $this->_name;

@@ -11,6 +11,15 @@ require_once 'responseCodeMessages.php';
  */
 class RequestExecutor
 {
+    // Resource URL patterns.
+    // In each pattern, the first %s will be replaced with the value of $this->_url.
+    // For term list, the 2nd %s is a search string and the %d is a limit number.
+    const RES_TERM_BY_ID   = '%s/api/term/id/%s/';
+    const RES_TERM_BY_NAME = '%s/api/term/%s/';
+    const RES_TERM_LIST    = '%s/api/term-list/%s/%d/';
+
+    const AUTHORIZATION_HEADER = 'X-Folksaurus-Authorization: %s'; // %s is the API key
+
     /**
      * The API key assigned to the app for which requests are made.
      *
@@ -33,15 +42,28 @@ class RequestExecutor
     protected $_latestResponseCode;
 
     /**
+     * A Curl object.
+     *
+     * @var type Curl
+     */
+    protected $_curlObj;
+
+    /**
      * Constructor
      *
      * @param string $apiKey
      * @param string $url
+     * @param Curl   $curlObj For passing in a mock Curl object.
      */
-    public function __construct($apiKey, $url)
+    public function __construct($apiKey, $url, \Curl $curlObj = null)
     {
         $this->_apiKey = $apiKey;
         $this->_url = trim($url, '/ ');
+        if ($curlObj === null) {
+            $this->_curlObj = new \Curl($url);
+        } else {
+            $this->_curlObj = $curlObj;
+        }
     }
 
     /**
@@ -70,23 +92,16 @@ class RequestExecutor
     /**
      * Add the specified headers plus the authorization header to the handle.
      *
-     * @param resource $handle  A cURL handle.
+     * @param Curl $handle   A Curl object.
      * @param array $headers
-     * @return resource         The handle with the headers added.
      */
-    protected function _addHeaders($handle, $headers = array())
+    protected function _addHeaders($headers = array())
     {
         $headers[] = sprintf(
-            'X-Folksaurus-Authorization: %s',
+            self::AUTHORIZATION_HEADER,
             $this->_apiKey
         );
-        curl_setopt($handle, CURLINFO_HEADER_OUT, true);
-        curl_setopt(
-            $handle,
-            CURLOPT_HTTPHEADER,
-            $headers
-        );
-        return $handle;
+        $this->_curlObj->httpheader = $headers;
     }
 
     /**
@@ -100,14 +115,13 @@ class RequestExecutor
      */
     protected function _executeGetRequest($uri)
     {
-        $handle = curl_init($uri);
-        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-        $handle = $this->_addHeaders($handle);
-        $response = curl_exec($handle);
-        $responseCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+        $this->_curlObj->init($uri);
+        $this->_addHeaders();
+        $json = $this->_curlObj->fetch_json(true);
+        $responseCode = $this->_curlObj->info('HTTP_CODE');
         $this->_latestResponseCode = $responseCode;
-        curl_close($handle);
-        return json_decode($response, true);
+        $this->_curlObj->close();
+        return $json;
     }
 
     /**
@@ -132,7 +146,7 @@ class RequestExecutor
     public function getByName($name)
     {
         $uri = sprintf(
-            '%s/api/term/%s/',
+            self::RES_TERM_BY_NAME,
             $this->_url,
             rawurlencode($name)
         );
@@ -154,18 +168,17 @@ class RequestExecutor
     public function createByName($name)
     {
         $uri = sprintf(
-            '%s/api/term/%s/',
+            self::RES_TERM_BY_NAME,
             $this->_url,
             rawurlencode($name)
         );
-        $handle = curl_init($uri);
-        curl_setopt($handle, CURLOPT_CUSTOMREQUEST, 'PUT');
-        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-        $handle = $this->_addHeaders($handle, array('Content-Length: 0'));
-        curl_setopt($handle, CURLOPT_POSTFIELDS, '');
-        $response = curl_exec($handle);
-        $this->_latestResponseCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-        return $response;
+        $this->_curlObj->init($uri);
+        $this->_curlObj->customrequest = 'PUT';
+        $this->_addHeaders(array('Content-Length: 0'));
+        $this->_curlObj->postfields = '';
+        $id = $this->_curlObj->fetch(true);
+        $this->_latestResponseCode = $this->_curlObj->info('HTTP_CODE');
+        return $id;
     }
 
     /**
@@ -199,7 +212,7 @@ class RequestExecutor
     public function getTermList($query, $limit = 25)
     {
         $uri = sprintf(
-            '%s/api/term-list/%s/%s/',
+            self::RES_TERM_LIST,
             $this->_url,
             rawurlencode($query),
             $limit
