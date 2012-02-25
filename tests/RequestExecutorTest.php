@@ -1,16 +1,11 @@
 <?php
 namespace Folksaurus;
 
-require_once 'PHPUnit/Framework/TestCase.php';
-
 /**
  * Test class for RequestExecutor.
  */
 class RequestExecutorTest extends \PHPUnit_Framework_TestCase
 {
-    const API_URL = 'http://www.folksaurus.com';
-    const API_KEY = 'foobarbaz';
-
     public function testGetById()
     {
         $mockCurl = $this->getMock('Curl');
@@ -21,7 +16,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
                 $this->equalTo(
                     sprintf(
                         RequestExecutor::RES_TERM_BY_ID,
-                        self::API_URL,
+                        API_URL,
                         '1'
                     )
                 )
@@ -29,7 +24,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
 
         // Authorization header set.
         $headers = array(
-            sprintf(RequestExecutor::AUTHORIZATION_HEADER, self::API_KEY)
+            sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
         );
         $mockCurl->expects($this->at(1))
             ->method('__set')
@@ -63,7 +58,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(200));
 
-        $rex = new RequestExecutor(self::API_KEY, self::API_URL, $mockCurl);
+        $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
         $term = $rex->getById('1');
         $this->assertTrue($term instanceof Term);
         $this->assertEquals(1, $term->getId());
@@ -80,7 +75,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
                 $this->equalTo(
                     sprintf(
                         RequestExecutor::RES_TERM_BY_NAME,
-                        self::API_URL,
+                        API_URL,
                         'Foo'
                     )
                 )
@@ -88,7 +83,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
 
         // Authorization header set.
         $headers = array(
-            sprintf(RequestExecutor::AUTHORIZATION_HEADER, self::API_KEY)
+            sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
         );
         $mockCurl->expects($this->at(1))
             ->method('__set')
@@ -122,7 +117,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(200));
 
-        $rex = new RequestExecutor(self::API_KEY, self::API_URL, $mockCurl);
+        $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
         $term = $rex->getByName('Foo');
         $this->assertTrue($term instanceof Term);
         $this->assertEquals(1, $term->getId());
@@ -139,7 +134,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
                 $this->equalTo(
                     sprintf(
                         RequestExecutor::RES_TERM_BY_NAME,
-                        self::API_URL,
+                        API_URL,
                         'Foo'
                     )
                 )
@@ -156,7 +151,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         // Content-Length and authorization headers set.
         $headers = array(
             'Content-Length: 0',
-            sprintf(RequestExecutor::AUTHORIZATION_HEADER, self::API_KEY)
+            sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
         );
         $mockCurl->expects($this->at(2))
             ->method('__set')
@@ -184,7 +179,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(201));
 
-        $rex = new RequestExecutor(self::API_KEY, self::API_URL, $mockCurl);
+        $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
         $id = $rex->createByName('Foo');
         $this->assertEquals(1, $id);
         $this->assertEquals(201, $rex->getLatestResponseCode());
@@ -201,7 +196,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
                 $this->equalTo(
                     sprintf(
                         RequestExecutor::RES_TERM_BY_NAME,
-                        self::API_URL,
+                        API_URL,
                         'Foo'
                     )
                 )
@@ -209,7 +204,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
 
         // Authorization header set.
         $headers = array(
-            sprintf(RequestExecutor::AUTHORIZATION_HEADER, self::API_KEY)
+            sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
         );
         $mockCurl->expects($this->at(1))
             ->method('__set')
@@ -243,7 +238,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(200));
 
-        $rex = new RequestExecutor(self::API_KEY, self::API_URL, $mockCurl);
+        $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
         $term = $rex->getOrCreate('Foo');
         $this->assertTrue($term instanceof Term);
         $this->assertEquals(1, $term->getId());
@@ -273,7 +268,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
                 $this->equalTo(
                     sprintf(
                         RequestExecutor::RES_TERM_BY_NAME,
-                        self::API_URL,
+                        API_URL,
                         'Foo'
                     )
                 )
@@ -290,7 +285,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         // Content-Length and authorization headers set.
         $headers = array(
             'Content-Length: 0',
-            sprintf(RequestExecutor::AUTHORIZATION_HEADER, self::API_KEY)
+            sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
         );
         $mockCurl->expects($this->at(7))
             ->method('__set')
@@ -325,7 +320,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
                 $this->equalTo(
                     sprintf(
                         RequestExecutor::RES_TERM_BY_ID,
-                        self::API_URL,
+                        API_URL,
                         '1'
                     )
                 )
@@ -333,7 +328,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
 
         // Authorization header set.
         $headers = array(
-            sprintf(RequestExecutor::AUTHORIZATION_HEADER, self::API_KEY)
+            sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
         );
         $mockCurl->expects($this->at(12))
             ->method('__set')
@@ -383,7 +378,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
                 $this->equalTo(
                     sprintf(
                         RequestExecutor::RES_TERM_LIST,
-                        self::API_URL,
+                        API_URL,
                         'Foo',
                         '3'
                     )
@@ -392,7 +387,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
 
         // Authorization header set.
         $headers = array(
-            sprintf(RequestExecutor::AUTHORIZATION_HEADER, self::API_KEY)
+            sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
         );
         $mockCurl->expects($this->at(1))
             ->method('__set')
@@ -420,7 +415,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(200));
 
-        $rex = new RequestExecutor(self::API_KEY, self::API_URL, $mockCurl);
+        $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
         $termSummaries = $rex->getTermList('Foo', 3);
         $this->assertEquals(2, count($termSummaries));
         $this->assertEquals('1', $termSummaries[0]->getId());
