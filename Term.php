@@ -83,6 +83,7 @@ class Term
         $this->_id        = $values['id'];
         $this->_name      = $values['name'];
         $this->_scopeNote = $values['scope_note'];
+        $this->_rex       = $rex;
 
         foreach ($values['broader'] as $broader) {
             $this->_broaderTerms[] = new TermSummary(
@@ -210,14 +211,14 @@ class Term
         if ($this->getStatus() != self::STATUS_NONPREFERRED) {
             return $this;
         }
-        $useTerms = $this->getUse();
+        $useTerms = $this->getUseTerms();
         if (count($useTerms) == 1) {
-            return $this->_rex->getById($useTerms[0]['id']);
+            return $this->_rex->getById($useTerms[0]->getId());
         }
         $preferredTerms = array();
         foreach ($useTerms as $useTerm) {
             $preferredTerms[] = $this->_rex->getById(
-                $useTerm[0]['id']
+                $useTerm->getId()
             );
         }
         return $preferredTerms;
