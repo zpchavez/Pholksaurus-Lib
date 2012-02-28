@@ -8,29 +8,27 @@ class TermSummaryTest extends \PHPUnit_Framework_TestCase
 {
     public function testGetCompleteTerm()
     {
-        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+        $mockApi = $this->getMock('Folksaurus\Api', array(), array(), '', false);
 
-        $term = new Term(
-            array(
-                'id'         => '1',
-                'name'       => 'Foo',
-                'scope_note' => '',
-                'broader'    => array(),
-                'narrower'   => array(),
-                'used_for'   => array(),
-                'use'        => array(),
-                'related'    => array()
-            ),
-            new RequestExecutor(API_KEY, API_URL)
+        $termArray = array(
+            'id'         => '1',
+            'name'       => 'Foo',
+            'scope_note' => '',
+            'broader'    => array(),
+            'narrower'   => array(),
+            'used_for'   => array(),
+            'use'        => array(),
+            'related'    => array()
         );
 
-        $mockRex->expects($this->once())
-            ->method('getById')
-            ->with($this->equalTo('1'))
-            ->will($this->returnValue($term));
 
-        $termSummary = new TermSummary(array('id' => '1', 'name' => 'Foo'), $mockRex);
+        $mockApi->expects($this->once())
+            ->method('getTermByFolksaurusId')
+            ->with($this->equalTo('1'))
+            ->will($this->returnValue($termArray));
+
+        $termSummary = new TermSummary(array('id' => '1', 'name' => 'Foo'), $mockApi);
         $returnValue = $termSummary->getCompleteTerm();
-        $this->assertEquals($term, $returnValue);
+        $this->assertEquals($termArray, $returnValue);
     }
 }

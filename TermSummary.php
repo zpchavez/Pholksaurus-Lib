@@ -24,32 +24,35 @@ class TermSummary
      */
     protected $_name;
 
+
     /**
-     * @var RequestExecutor
+     * An Api object, which is used to get info on related terms.
+     *
+     * @var Api
      */
-    protected $_rex;
+    protected $_api;
 
     /**
      * Constructor.
      *
      * @param array $values  An array with keys "id" and "name".
-     * @param RequestExecutor $rex
+     * @param Api $api
      */
-    public function __construct(array $values, RequestExecutor $rex)
+    public function __construct(array $values, Api $api)
     {
         $this->_id   = $values['id'];
         $this->_name = $values['name'];
-        $this->_rex  = $rex;
+        $this->_api  = $api;
     }
 
     /**
-     * Get a Term object for this term.
+     * Get a complete term info array for this term.
      *
-     * @return Term|bool  False on failure.
+     * @return Term
      */
     public function getCompleteTerm()
     {
-        return $this->_rex->getById($this->_id);
+        return $this->_api->getTermByFolksaurusId($this->_id);
     }
 
     /**

@@ -1,7 +1,4 @@
 <?php
-/**
- * Library for accessing Folksaurus.
- */
 namespace Folksaurus;
 
 require_once 'responseCodeMessages.php';
@@ -111,34 +108,34 @@ class RequestExecutor
      * the response code.  Return NULL if the body is empty.
      *
      * @param string $uri
-     * @return mixed
+     * @return array      An array of decoded JSON data, or NULL if no response.
      */
     protected function _executeGetRequest($uri)
     {
         $this->_curlObj->init($uri);
         $this->_addHeaders();
-        $json = $this->_curlObj->fetch_json(true);
+        $response = $this->_curlObj->fetch_json(true);
         $responseCode = $this->_curlObj->info('HTTP_CODE');
         $this->_latestResponseCode = $responseCode;
         $this->_curlObj->close();
-        return $json;
+        return $response;
     }
 
     /**
-     * Get a Term object by its ID.
+     * Get a term info array by its Folksaurus ID.
      *
      * @param int $termId
-     * @return Term|bool  False if not found.
+     * @return array
      */
     public function getById($termId)
     {
         $uri = sprintf('%s/api/term/id/%s/', $this->_url, $termId);
         $termArray = $this->_executeGetRequest($uri);
-        return new Term($termArray, $this);
+        return $termArray;
     }
 
     /**
-     * Get a Term object by its name, or false if not found.
+     * Get a term info array by the term name, or false if not found.
      *
      * @param string $name
      * @return array
@@ -154,7 +151,7 @@ class RequestExecutor
         if (!$termArray) {
             return false;
         }
-        return new Term($termArray, $this);
+        return $termArray;
     }
 
     /**
@@ -185,14 +182,13 @@ class RequestExecutor
      * Attempt to get a term by name.  If it does not exist, create it.
      *
      * @param string $name
-     * @return array        The Term object for the new or found term.
-     *                      False if unable to get or create.
+     * @return array        If found, a term info array.  Otherwise, false.
      */
     public function getOrCreate($name)
     {
-        $term = $this->getByName($name);
-        if ($term) {
-            return $term;
+        $termArray = $this->getByName($name);
+        if ($termArray) {
+            return $termArray;
         }
         $id = $this->createByName($name);
         if ($id) {
@@ -202,7 +198,7 @@ class RequestExecutor
     }
 
     /**
-     * Get an array of TermSummary objects for terms
+     * Get an array of arrays with keys 'id' and 'name' for terms
      * whose names start with $query.
      *
      * @param string $query
@@ -220,7 +216,7 @@ class RequestExecutor
         $termArrays = $this->_executeGetRequest($uri);
         $termList = array();
         foreach ($termArrays as $termArray) {
-            $termList[] = new TermSummary($termArray, $this);
+            $termList[] = $termArray;
         }
         return $termList;
     }

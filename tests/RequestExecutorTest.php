@@ -6,6 +6,25 @@ namespace Folksaurus;
  */
 class RequestExecutorTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * Get a simple term array for an unsorted term called Foo.
+     *
+     * @return array
+     */
+    protected function _getFooTermArray()
+    {
+        return array(
+            'id'         => '1',
+            'name'       => 'Foo',
+            'scope_note' => 'A term.',
+            'broader'    => array(),
+            'narrower'   => array(),
+            'related'    => array(),
+            'used_for'   => array(),
+            'use'        => array()
+        );
+    }
+
     public function testGetById()
     {
         $mockCurl = $this->getMock('Curl');
@@ -37,20 +56,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         $mockCurl->expects($this->at(2))
             ->method('fetch_json')
             ->with($this->equalTo(true))
-            ->will(
-                $this->returnValue(
-                    array(
-                        'id'         => '1',
-                        'name'       => 'Foo',
-                        'scope_note' => 'A term.',
-                        'broader'    => array(),
-                        'narrower'   => array(),
-                        'related'    => array(),
-                        'used_for'   => array(),
-                        'use'        => array()
-                    )
-                )
-            );
+            ->will($this->returnValue($this->_getFooTermArray()));
 
         // Response code retrieved.
         $mockCurl->expects($this->at(3))
@@ -59,10 +65,8 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(200));
 
         $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
-        $term = $rex->getById('1');
-        $this->assertTrue($term instanceof Term);
-        $this->assertEquals(1, $term->getId());
-        $this->assertEquals('Foo', $term->getName());
+        $termArray = $rex->getById('1');
+        $this->assertEquals($this->_getFooTermArray(), $termArray);
     }
 
     public function testGetByName()
@@ -96,20 +100,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         $mockCurl->expects($this->at(2))
             ->method('fetch_json')
             ->with($this->equalTo(true))
-            ->will(
-                $this->returnValue(
-                    array(
-                        'id'         => '1',
-                        'name'       => 'Foo',
-                        'scope_note' => 'A term.',
-                        'broader'    => array(),
-                        'narrower'   => array(),
-                        'related'    => array(),
-                        'used_for'   => array(),
-                        'use'        => array()
-                    )
-                )
-            );
+            ->will($this->returnValue($this->_getFooTermArray()));
 
         // Response code retrieved.
         $mockCurl->expects($this->at(3))
@@ -118,10 +109,8 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(200));
 
         $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
-        $term = $rex->getByName('Foo');
-        $this->assertTrue($term instanceof Term);
-        $this->assertEquals(1, $term->getId());
-        $this->assertEquals('Foo', $term->getName());
+        $termArray = $rex->getByName('Foo');
+        $this->assertEquals($this->_getFooTermArray(), $termArray);
     }
 
     public function testCreateByName()
@@ -217,20 +206,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         $mockCurl->expects($this->at(2))
             ->method('fetch_json')
             ->with($this->equalTo(true))
-            ->will(
-                $this->returnValue(
-                    array(
-                        'id'         => '1',
-                        'name'       => 'Foo',
-                        'scope_note' => 'A term.',
-                        'broader'    => array(),
-                        'narrower'   => array(),
-                        'related'    => array(),
-                        'used_for'   => array(),
-                        'use'        => array()
-                    )
-                )
-            );
+            ->will($this->returnValue($this->_getFooTermArray()));
 
         // Response code retrieved.
         $mockCurl->expects($this->at(3))
@@ -239,10 +215,8 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(200));
 
         $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
-        $term = $rex->getOrCreate('Foo');
-        $this->assertTrue($term instanceof Term);
-        $this->assertEquals(1, $term->getId());
-        $this->assertEquals('Foo', $term->getName());
+        $termArray = $rex->getOrCreate('Foo');
+        $this->assertEquals($this->_getFooTermArray(), $termArray);
 
         // But if no term is found, it creates it.
         $mockCurl->expects($this->at(2))
@@ -341,20 +315,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         $mockCurl->expects($this->at(13))
             ->method('fetch_json')
             ->with($this->equalTo(true))
-            ->will(
-                $this->returnValue(
-                    array(
-                        'id'         => '1',
-                        'name'       => 'Foo',
-                        'scope_note' => 'A term.',
-                        'broader'    => array(),
-                        'narrower'   => array(),
-                        'related'    => array(),
-                        'used_for'   => array(),
-                        'use'        => array()
-                    )
-                )
-            );
+            ->will($this->returnValue($this->_getFooTermArray()));
 
         // Response code retrieved.
         $mockCurl->expects($this->at(14))
@@ -362,10 +323,8 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(200));
 
-        $term = $rex->getOrCreate('Foo');
-        $this->assertTrue($term instanceof Term);
-        $this->assertEquals(1, $term->getId());
-        $this->assertEquals('Foo', $term->getName());
+        $termArray = $rex->getOrCreate('Foo');
+        $this->assertEquals($this->_getFooTermArray(), $termArray);
     }
 
     public function testGetByTermList()
@@ -418,9 +377,9 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
         $termSummaries = $rex->getTermList('Foo', 3);
         $this->assertEquals(2, count($termSummaries));
-        $this->assertEquals('1', $termSummaries[0]->getId());
-        $this->assertEquals('Foo', $termSummaries[0]->getName());
-        $this->assertEquals('2', $termSummaries[1]->getId());
-        $this->assertEquals('Foobar', $termSummaries[1]->getName());
+        $this->assertEquals('1', $termSummaries[0]['id']);
+        $this->assertEquals('Foo', $termSummaries[0]['name']);
+        $this->assertEquals('2', $termSummaries[1]['id']);
+        $this->assertEquals('Foobar', $termSummaries[1]['name']);
     }
 }

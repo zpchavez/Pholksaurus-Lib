@@ -69,50 +69,104 @@ class Term
     protected $_useTerms = array();
 
     /**
-     * @var RequestExecutor
+     * A timestamp of when the details for the term were last retrieved.
+     *
+     * @var string
      */
-    protected $_rex;
+    protected $_lastRetrieved = 0;
 
     /**
-     * @var array $values  The array encoded in the JSON returned by
-     *                     a get term request.
-     * @param RequestExecutor $rex
+     * The ID assigned to this term by your application.
+     *
+     * @var string
      */
-    public function __construct(array $values, RequestExecutor $rex)
+    protected $_appId = '';
+
+    /**
+     * An Api object, which is used to get info on related terms.
+     *
+     * @var Api
+     */
+    protected $_api;
+
+    /**
+     * Constructor
+     *
+     * $values must contain the following keys:
+     *
+     * <pre>
+     * id (the Folksaurus-assigned ID)
+     * name
+     * scope_note
+     * broader
+     * narrower
+     * related
+     * used_for
+     * use
+     *
+     * and optionally:
+     *
+     * app_id
+     * last_retrieved (a UNIX timestamp)
+     *
+     * Values for the keys between 'broader' and 'use' are arrays
+     * where each element is an array with the following keys:
+     *
+     * id (the Folksaurus-assigned ID)
+     * name
+     *
+     * and optionally:
+     *
+     * app_id
+     * </pre>
+     *
+     * @var array $values
+     * @param Api $api
+     */
+    public function __construct(array $values, Api $api)
     {
-        $this->_id        = $values['id'];
-        $this->_name      = $values['name'];
-        $this->_scopeNote = $values['scope_note'];
-        $this->_rex       = $rex;
+        // @todo Check values and throw exception if missing required values.
+
+        $this->_id            = $values['id'];
+        $this->_name          = $values['name'];
+        $this->_scopeNote     = $values['scope_note'];
+        $this->_api           = $api;
+
+        if (isset($values['app_id'])) {
+            $this->_appId = $values['app_id'];
+        }
+        if (isset($values['last_retrieved'])) {
+            $this->_lastRetrieved = $values['last_retrieved'];
+        }
 
         foreach ($values['broader'] as $broader) {
             $this->_broaderTerms[] = new TermSummary(
                 $broader,
-                $rex
+                $api
             );
         }
         foreach ($values['narrower'] as $narrower) {
             $this->_narrowerTerms[] = new TermSummary(
                 $narrower,
-                $rex
+                $api
             );
         }
         foreach ($values['related'] as $related) {
             $this->_relatedTerms[] = new TermSummary(
                 $related,
-                $rex
+                $api
             );
         }
         foreach ($values['used_for'] as $usedFor) {
             $this->_usedForTerms[] = new TermSummary(
                 $usedFor,
-                $rex
+                $api
             );
         }
         foreach ($values['use'] as $use) {
             $this->_useTerms[] = new TermSummary(
                 $use,
-                $rex
+                $api
             );
         }
     }
@@ -213,11 +267,11 @@ class Term
         }
         $useTerms = $this->getUseTerms();
         if (count($useTerms) == 1) {
-            return $this->_rex->getById($useTerms[0]->getId());
+            return $this->_api->getTermByFolksaurusId($useTerms[0]->getId());
         }
         $preferredTerms = array();
         foreach ($useTerms as $useTerm) {
-            $preferredTerms[] = $this->_rex->getById(
+            $preferredTerms[] = $this->_api->getTermByFolksaurusId(
                 $useTerm->getId()
             );
         }
@@ -235,13 +289,43 @@ class Term
     }
 
     /**
-     * Get the ID.
+     * Get the Folksaurus-assigned ID.
      *
      * @return int
      */
     public function getId()
     {
         return $this->_id;
+    }
+
+    /**
+     * Get the scope note.
+     *
+     * @return string
+     */
+    public function getScopeNote()
+    {
+        return $this->_scopeNote;
+    }
+
+    /**
+     * Get the ID assigned by your application.
+     *
+     * @return string
+     */
+    public function getAppId()
+    {
+        return $this->_appId;
+    }
+
+    /**
+     * Get the timestamp from when the term details were last retrieved from Folksaurus.
+     *
+     * @return string
+     */
+    public function getLastRetrievedTime()
+    {
+        return $this->_lastRetrieved;
     }
 
     /**
@@ -253,4 +337,5 @@ class Term
     {
         return $this->_name;
     }
+
 }
