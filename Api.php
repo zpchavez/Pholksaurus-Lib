@@ -82,24 +82,9 @@ class Api
         $termArray = $this->_dataMapper->getTermByAppId($id);
         if ($termArray) {
             $term = new Term($termArray, $this);
-            $lastRetrievedTime = $term->getLastRetrievedTime();
-            $now = time();
-            $secondsSinceUpdate = ($now - $lastRetrievedTime);
-            if ($secondsSinceUpdate > $this->_config['expire_time']) {
-                $termArray = $this->_rex->getById($term->getId());
-                if (!$termArray) {
-                    return $term;
-                }
-                $termArray['last_retrieved'] = time();
-                $termArray['app_id'] = $id;
-                $updatedTerm = new Term($termArray, $this);
-                $this->_dataMapper->saveTerm($updatedTerm);
-                return $updatedTerm;
-            }
-            return $term;
-        } else {
-            return false;
+            return $this->_getLatestTerm($term);
         }
+        return false;
     }
 
     /**
@@ -112,6 +97,50 @@ class Api
      */
     public function getTermByFolksaurusId($id)
     {
-        $this->_dataMapper->getTermByFolksaurusId($id);
+        $termArray = $this->_dataMapper->getTermByFolksaurusId($id);
+        if ($termArray) {
+            $term = new Term($termArray, $this);
+            return $this->_getLatestTerm($term);
+        } else {
+            $termArray = $this->_rex->getById($id);
+            if ($termArray) {
+                $termArray['last_retrieved'] = time();
+                $term = new Term($termArray, $this);
+                $this->_dataMapper->saveTerm($term);
+                return $term;
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Get the latest data for $term and return an updated Term object.
+     *
+     * If term is current, return it back.
+     *
+     * If term is out-of-date, retrieve the latest version, save to DB, and return it.
+     *
+     * Original term also returned if the request fails.
+     *
+     * @param Term $term
+     * @return Term
+     */
+    protected function _getLatestTerm(Term $term)
+    {
+        $lastRetrievedTime = $term->getLastRetrievedTime();
+        $now = time();
+        $secondsSinceUpdate = ($now - $lastRetrievedTime);
+        if ($secondsSinceUpdate > $this->_config['expire_time']) {
+            $updatedTermArray = $this->_rex->getById($term->getId());
+            if (!$updatedTermArray) {
+                return $term;
+            }
+            $updatedTermArray['last_retrieved'] = time();
+            $updatedTermArray['app_id'] = $term->getAppId();
+            $updatedTerm = new Term($updatedTermArray, $this);
+            $this->_dataMapper->saveTerm($updatedTerm);
+            return $updatedTerm;
+        }
+        return $term;
     }
 }
