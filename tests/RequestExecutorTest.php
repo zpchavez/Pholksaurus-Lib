@@ -69,6 +69,83 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->_getFooTermArray(), $termArray);
     }
 
+    public function testGetByIdIfModifiedSince()
+    {
+        $mockCurl = $this->getMock('Curl');
+        // Init called on object with url to term resource.
+        $mockCurl->expects($this->at(0))
+            ->method('init')
+            ->with(
+                $this->equalTo(
+                    sprintf(
+                        RequestExecutor::RES_TERM_BY_ID,
+                        API_URL,
+                        '1'
+                    )
+                )
+            );
+
+        // Authorization header and if-modified-since header set.
+        $headers = array(
+        'If-Modified-Since: ' . gmdate('D, d M Y H:i:s \G\M\T', time()),
+            sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
+        );
+        $mockCurl->expects($this->at(1))
+            ->method('__set')
+            ->with(
+                $this->equalTo('httpheader'),
+                $this->equalTo($headers)
+            );
+
+        // JSON fetched.
+        $mockCurl->expects($this->at(2))
+            ->method('fetch_json')
+            ->with($this->equalTo(true))
+            ->will($this->returnValue(NULL));
+
+        // Response code retrieved.
+        $mockCurl->expects($this->at(3))
+            ->method('info')
+            ->with($this->equalTo('HTTP_CODE'))
+            ->will($this->returnValue(304));
+
+        // False returned if response is NULL because term not modified since.
+
+        $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
+        $returnValue = $rex->getByIdIfModifiedSince('1', time());
+        $this->assertFalse($returnValue);
+        $this->assertEquals(304, $rex->getLatestResponseCode());
+
+        // False also returned if response is NULL because the term was not found at all.
+
+        // Response code retrieved.
+        $mockCurl->expects($this->at(3))
+            ->method('info')
+            ->with($this->equalTo('HTTP_CODE'))
+            ->will($this->returnValue(404));
+
+        $returnValue = $rex->getByIdIfModifiedSince('1', time());
+        $this->assertFalse($returnValue);
+        $this->assertEquals(404, $rex->getLatestResponseCode());
+
+        // If term is found and has been modified, the term array is returned.
+
+        $mockCurl->expects($this->at(2))
+            ->method('fetch_json')
+            ->with($this->equalTo(true))
+            ->will($this->returnValue($this->_getFooTermArray()));
+
+        $mockCurl->expects($this->at(3))
+            ->method('info')
+            ->with($this->equalTo('HTTP_CODE'))
+            ->will($this->returnValue(200));
+
+        $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
+        $termArray = $rex->getByIdIfModifiedSince('1', time());
+        $this->assertEquals($this->_getFooTermArray(), $termArray);
+        $this->assertEquals(200, $rex->getLatestResponseCode());
+    }
+
     public function testGetByName()
     {
         $mockCurl = $this->getMock('Curl');
@@ -111,6 +188,82 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
         $termArray = $rex->getByName('Foo');
         $this->assertEquals($this->_getFooTermArray(), $termArray);
+    }
+
+    public function testGetByNameIfModifiedSince()
+    {
+        $mockCurl = $this->getMock('Curl');
+        // Init called on object with url to term resource.
+        $mockCurl->expects($this->at(0))
+            ->method('init')
+            ->with(
+                $this->equalTo(
+                    sprintf(
+                        RequestExecutor::RES_TERM_BY_NAME,
+                        API_URL,
+                        'Foo'
+                    )
+                )
+            );
+
+        // Authorization header and if-modified-since header set.
+        $headers = array(
+        'If-Modified-Since: ' . gmdate('D, d M Y H:i:s \G\M\T', time()),
+            sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
+        );
+        $mockCurl->expects($this->at(1))
+            ->method('__set')
+            ->with(
+                $this->equalTo('httpheader'),
+                $this->equalTo($headers)
+            );
+
+        // JSON fetched.
+        $mockCurl->expects($this->at(2))
+            ->method('fetch_json')
+            ->with($this->equalTo(true))
+            ->will($this->returnValue(NULL));
+
+        // Response code retrieved.
+        $mockCurl->expects($this->at(3))
+            ->method('info')
+            ->with($this->equalTo('HTTP_CODE'))
+            ->will($this->returnValue(304));
+
+        // False returned if response is NULL because term not modified since.
+
+        $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
+        $returnValue = $rex->getByNameIfModifiedSince('Foo', time());
+        $this->assertFalse($returnValue);
+
+        // False also returned if response is NULL because the term was not found at all.
+
+        // Response code retrieved.
+        $mockCurl->expects($this->at(3))
+            ->method('info')
+            ->with($this->equalTo('HTTP_CODE'))
+            ->will($this->returnValue(404));
+
+        $returnValue = $rex->getByNameIfModifiedSince('Foo', time());
+        $this->assertFalse($returnValue);
+        $this->assertEquals(404, $rex->getLatestResponseCode());
+
+        // If term is found and has been modified, the term array is returned.
+
+        $mockCurl->expects($this->at(2))
+            ->method('fetch_json')
+            ->with($this->equalTo(true))
+            ->will($this->returnValue($this->_getFooTermArray()));
+
+        $mockCurl->expects($this->at(3))
+            ->method('info')
+            ->with($this->equalTo('HTTP_CODE'))
+            ->will($this->returnValue(200));
+
+        $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
+        $termArray = $rex->getByNameIfModifiedSince('Foo', time());
+        $this->assertEquals($this->_getFooTermArray(), $termArray);
+        $this->assertEquals(200, $rex->getLatestResponseCode());
     }
 
     public function testCreateByName()

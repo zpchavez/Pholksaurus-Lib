@@ -108,12 +108,20 @@ class RequestExecutor
      * the response code.  Return NULL if the body is empty.
      *
      * @param string $uri
+     * @param int $ifModifiedSince  Optional if-modified-since timestamp.
      * @return array      An array of decoded JSON data, or NULL if no response.
      */
-    protected function _executeGetRequest($uri)
+    protected function _executeGetRequest($uri, $ifModifiedSince = null)
     {
         $this->_curlObj->init($uri);
-        $this->_addHeaders();
+        if ($ifModifiedSince) {
+            $additionalHeaders = array(
+                'If-Modified-Since: ' . gmdate('D, d M Y H:i:s \G\M\T', $ifModifiedSince)
+            );
+        } else {
+            $additionalHeaders = array();
+        }
+        $this->_addHeaders($additionalHeaders);
         $response = $this->_curlObj->fetch_json(true);
         $responseCode = $this->_curlObj->info('HTTP_CODE');
         $this->_latestResponseCode = $responseCode;
@@ -124,14 +132,61 @@ class RequestExecutor
     /**
      * Get a term info array by its Folksaurus ID.
      *
+     * @param type $termId
+     * @param type $ifModifiedSince
+     * @return array|bool            False if term not found, or if $ifModifiedSince
+     *                               is specified and the term has not changed.
+     */
+    protected function _getById($termId, $ifModifiedSince = null)
+    {
+        $uri = sprintf(self::RES_TERM_BY_ID, $this->_url, $termId);
+        $response = $this->_executeGetRequest($uri, $ifModifiedSince);
+        return $response ?: false;
+    }
+
+    /**
+     * Get a term info array by its Folksaurus ID.
+     *
      * @param int $termId
-     * @return array
+     * @return array|bool  False if not found or not modified since.
      */
     public function getById($termId)
     {
-        $uri = sprintf('%s/api/term/id/%s/', $this->_url, $termId);
-        $termArray = $this->_executeGetRequest($uri);
-        return $termArray;
+        return $this->_getById($termId);
+    }
+
+    /**
+     * Get a term info array only if the term has been modified since $ifModifiedSince.
+     *
+     * @param int $termId
+     * @param int $ifModifiedSince  A timestamp.
+     * @return array|bool           The term if found and modified since.
+     *                              False if not found or not modified since.
+     *                              To determine which, call getLastResponseCode.
+     *                              304 means the term was found but unchanged.
+     */
+    public function getByIdIfModifiedSince($termId, $ifModifiedSince)
+    {
+        return $this->_getById($termId, $ifModifiedSince);
+    }
+
+    /**
+     * Get a term info array by the term name.
+     *
+     * @param string $name
+     * @param int $ifModifiedSince   A timestamp.
+     * @return array|bool            False if term not found, or if $ifModifiedSince
+     *                               is specified and the term has not changed since.
+     */
+    public function _getByName($name, $ifModifiedSince = null)
+    {
+        $uri = sprintf(
+            self::RES_TERM_BY_NAME,
+            $this->_url,
+            rawurlencode($name)
+        );
+        $response = $this->_executeGetRequest($uri, $ifModifiedSince);
+        return $response ?: false;
     }
 
     /**
@@ -142,16 +197,22 @@ class RequestExecutor
      */
     public function getByName($name)
     {
-        $uri = sprintf(
-            self::RES_TERM_BY_NAME,
-            $this->_url,
-            rawurlencode($name)
-        );
-        $termArray = $this->_executeGetRequest($uri);
-        if (!$termArray) {
-            return false;
-        }
-        return $termArray;
+        return $this->_getByName($name);
+    }
+
+    /**
+     * Get a term info array only if the term has been modified since $ifModifiedSince.
+     *
+     * @param string $name
+     * @param int $ifModifiedSince  A timestamp.
+     * @return array|bool           The term if found and modified since.
+     *                              False if not found or not modified since.
+     *                              To determine which, call getLastResponseCode.
+     *                              304 means the term was found but unchanged.
+     */
+    public function getByNameIfModifiedSince($name, $ifModifiedSince)
+    {
+        return $this->_getByName($name, $ifModifiedSince);
     }
 
     /**
