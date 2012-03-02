@@ -131,7 +131,10 @@ class Api
         $now = time();
         $secondsSinceUpdate = ($now - $lastRetrievedTime);
         if ($secondsSinceUpdate > $this->_config['expire_time']) {
-            $updatedTermArray = $this->_rex->getById($term->getId());
+            $updatedTermArray = $this->_rex->getByIdIfModifiedSince(
+                $term->getId(),
+                $lastRetrievedTime
+            );
             if (!$updatedTermArray) {
                 return $term;
             }

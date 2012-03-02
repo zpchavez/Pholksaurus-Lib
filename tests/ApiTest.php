@@ -43,6 +43,8 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         // Won't send a request to Folksaurus, because the ID is unknown.
         $mockRex->expects($this->never())
             ->method('getById');
+        $mockRex->expects($this->never())
+            ->method('getByIdIfModifiedSince');
 
         $api = new Api($mockDM, $mockRex, CONFIG_PATH);
         $term = $api->getTermByAppId(404);
@@ -55,8 +57,9 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $mockDM  = $this->getMock('Folksaurus\DataMapper');
         $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
 
+        $justNow = time();
         $fooTermArray = $this->_getFooTermArray();
-        $fooTermArray['last_retrieved'] = time();
+        $fooTermArray['last_retrieved'] = $justNow;
 
         $mockDM->expects($this->once())
             ->method('getTermByAppId')
@@ -66,6 +69,8 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         // Won't send a request to Folksaurus, because term was retrieved recently.
         $mockRex->expects($this->never())
             ->method('getById');
+        $mockRex->expects($this->never())
+            ->method('getByIdIfModifiedSince');
 
         // Won't save, because no changes were retrieved.
         $mockDM->expects($this->never())
@@ -80,12 +85,14 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(self::FOO_APP_ID, $term->getAppId());
     }
 
-    public function testGetTermByAppIdForExpiredTermInDatabase()
+    public function testGetTermByAppIdForExpiredTermInDatabaseThatHasBeenModified()
     {
         $mockDM  = $this->getMock('Folksaurus\DataMapper');
         $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
 
+        $yesterday = time() - (60 * 60 * 24);
         $fooTermArray = $this->_getFooTermArray();
+        $fooTermArray['last_retrieved'] = $yesterday;
 
         $mockDM->expects($this->once())
             ->method('getTermByAppId')
@@ -97,9 +104,11 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 
         // Term is expired, so send request for latest info.
         $mockRex->expects($this->once())
-            ->method('getById')
-            ->with($this->equalTo(self::FOO_FOLKSAURUS_ID))
-            ->will($this->returnValue($updatedFooTermArray));
+            ->method('getByIdIfModifiedSince')
+            ->with(
+                $this->equalTo(self::FOO_FOLKSAURUS_ID),
+                $this->equalTo($yesterday)
+            )->will($this->returnValue($updatedFooTermArray));
 
         // Save latest term info.
         $mockDM->expects($this->once())
@@ -115,6 +124,46 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(self::FOO_FOLKSAURUS_ID, $term->getId());
         $this->assertEquals(self::FOO_APP_ID, $term->getAppId());
         $this->assertEquals('Updated scope note', $term->getScopeNote());
+        $this->assertTrue($term->getLastRetrievedTime() > 0);
+    }
+
+    public function testGetTermByAppIdForExpiredTermInDatabaseThatHasNotBeenModified()
+    {
+        $mockDM  = $this->getMock('Folksaurus\DataMapper');
+        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+
+        $yesterday = time() - (60 * 60 * 24);
+        $fooTermArray = $this->_getFooTermArray();
+        $fooTermArray['last_retrieved'] = $yesterday;
+
+        $mockDM->expects($this->once())
+            ->method('getTermByAppId')
+            ->with($this->equalTo(self::FOO_APP_ID))
+            ->will($this->returnValue($fooTermArray));
+
+        // Term is expired, so send request for latest info.
+        // False returned since there was no content in the body of the response.
+        // But with response code 304, meaning not modified since.
+        $mockRex->expects($this->once())
+            ->method('getByIdIfModifiedSince')
+            ->with(
+                $this->equalTo(self::FOO_FOLKSAURUS_ID),
+                $this->equalTo($yesterday)
+            )->will($this->returnValue(false));
+
+        // No term saved since there were no changes.
+        $mockDM->expects($this->never())
+            ->method('saveTerm');
+
+        $api = new Api($mockDM, $mockRex, CONFIG_PATH);
+
+        $term = $api->getTermByAppId(100);
+
+        $this->assertTrue($term instanceof Term);
+        $this->assertEquals('Foo', $term->getName());
+        $this->assertEquals(self::FOO_FOLKSAURUS_ID, $term->getId());
+        $this->assertEquals(self::FOO_APP_ID, $term->getAppId());
+        $this->assertEquals('A term.', $term->getScopeNote());
         $this->assertTrue($term->getLastRetrievedTime() > 0);
     }
 
@@ -180,12 +229,14 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(self::FOO_APP_ID, $term->getAppId());
     }
 
-    public function testGetTermByFolksaurusIdForExpiredTermInDatabase()
+    public function testGetTermByFolksaurusIdForExpiredTermInDatabaseThatHasBeenModified()
     {
         $mockDM  = $this->getMock('Folksaurus\DataMapper');
         $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
 
+        $yesterday = time() - (60 * 60 * 24);
         $fooTermArray = $this->_getFooTermArray();
+        $fooTermArray['last_retrieved'] = $yesterday;
 
         $mockDM->expects($this->once())
             ->method('getTermByFolksaurusId')
@@ -197,7 +248,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 
         // Term is expired, so send request for latest info.
         $mockRex->expects($this->once())
-            ->method('getById')
+            ->method('getByIdIfModifiedSince')
             ->with($this->equalTo(self::FOO_FOLKSAURUS_ID))
             ->will($this->returnValue($updatedFooTermArray));
 
@@ -214,6 +265,44 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(self::FOO_FOLKSAURUS_ID, $term->getId());
         $this->assertEquals(self::FOO_APP_ID, $term->getAppId());
         $this->assertEquals('Updated scope note', $term->getScopeNote());
+        $this->assertTrue($term->getLastRetrievedTime() > 0);
+    }
+
+    public function testGetTermByFolksaurusIdForExpiredTermInDatabaseThatHasNotBeenModified()
+    {
+        $mockDM  = $this->getMock('Folksaurus\DataMapper');
+        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+
+        $yesterday = time() - (60 * 60 * 24);
+        $fooTermArray = $this->_getFooTermArray();
+        $fooTermArray['last_retrieved'] = $yesterday;
+
+        $mockDM->expects($this->once())
+            ->method('getTermByFolksaurusId')
+            ->with($this->equalTo(self::FOO_FOLKSAURUS_ID))
+            ->will($this->returnValue($fooTermArray));
+
+        $updatedFooTermArray = $fooTermArray;
+        $updatedFooTermArray['scope_note'] = 'Updated scope note';
+
+        // Term is expired, so send request for latest info.
+        $mockRex->expects($this->once())
+            ->method('getByIdIfModifiedSince')
+            ->with($this->equalTo(self::FOO_FOLKSAURUS_ID))
+            ->will($this->returnValue(false));
+
+        // No term saved since there were no changes.
+        $mockDM->expects($this->never())
+            ->method('saveTerm');
+
+        $api = new Api($mockDM, $mockRex, CONFIG_PATH);
+        $term = $api->getTermByFolksaurusId(self::FOO_FOLKSAURUS_ID);
+
+        $this->assertTrue($term instanceof Term);
+        $this->assertEquals('Foo', $term->getName());
+        $this->assertEquals(self::FOO_FOLKSAURUS_ID, $term->getId());
+        $this->assertEquals(self::FOO_APP_ID, $term->getAppId());
+        $this->assertEquals('A term.', $term->getScopeNote());
         $this->assertTrue($term->getLastRetrievedTime() > 0);
     }
 }
