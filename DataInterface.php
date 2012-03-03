@@ -4,7 +4,7 @@ namespace Folksaurus;
 /**
  * An interface for working with the Folksaurus term data in your own database.
  */
-interface DataMapper
+interface DataInterface
 {
     /**
      * Retrieve a term by the ID assigned to it by your application.
@@ -30,10 +30,6 @@ interface DataMapper
      * The term may be new, or it may be an update of a term
      * that already exists in your database.  The app_id
      * should be set if the term already exists.
-     *
-     * Set a timestamp of the
-     *
-     * Update $term with the app_id if one is assigned.
      *
      * @param Term $term
      */

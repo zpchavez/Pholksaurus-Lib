@@ -184,8 +184,8 @@ class TermTest extends \PHPUnit_Framework_TestCase
 
     public function testGetStatus()
     {
-        $mockDM = $this->getMock('Folksaurus\DataMapper');
-        $api = new Api($mockDM);
+        $mockDI = $this->getMock('Folksaurus\DataInterface');
+        $api = new Api($mockDI);
 
         $preferredTerm = new Term($this->_getPreferredTermArray(), $api);
         $nonPreferredTerm = new Term($this->_getNonPreferredTermArray(), $api);
@@ -198,8 +198,8 @@ class TermTest extends \PHPUnit_Framework_TestCase
 
     public function testIsAmbiguous()
     {
-        $mockDM = $this->getMock('Folksaurus\DataMapper');
-        $api = new Api($mockDM);
+        $mockDI = $this->getMock('Folksaurus\DataInterface');
+        $api = new Api($mockDI);
 
         $preferredTerm = new Term($this->_getPreferredTermArray(), $api);
         $nonPreferredTerm = new Term($this->_getNonPreferredTermArray(), $api);

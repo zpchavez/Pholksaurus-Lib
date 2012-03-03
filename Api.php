@@ -18,7 +18,7 @@ class Api
      *
      * @var DataInterface
      */
-    protected $_dataMapper;
+    protected $_dataInterface;
 
     /**
      * @var RequestExecutor
@@ -28,14 +28,14 @@ class Api
     /**
      * Constructor.
      *
-     * @param DataInterface $dataMapper  An implementation of DataMapper.
+     * @param DataInterface $dataInterface  An implementation of DataInterface.
      * @param RequestExecutor $rex       If not provided, an instance will be created
      *                                   using api_key and api_url from the config file.
      * @param string $configFile         The relative path to the config file to use.
      * @throws Exception if config file could not be found or read or is missing
      *                   required values.
      */
-    public function __construct(DataMapper $dataMapper, RequestExecutor $rex = null,
+    public function __construct(DataInterface $dataInterface, RequestExecutor $rex = null,
                                 $configFile = 'config.ini')
     {
         $config = parse_ini_file($configFile);
@@ -64,7 +64,7 @@ class Api
             );
         }
         $this->_config        = $config;
-        $this->_dataMapper = $dataMapper;
+        $this->_dataInterface = $dataInterface;
         $this->_rex           = $rex;
     }
 
@@ -79,7 +79,7 @@ class Api
      */
     public function getTermByAppId($id)
     {
-        $termArray = $this->_dataMapper->getTermByAppId($id);
+        $termArray = $this->_dataInterface->getTermByAppId($id);
         if ($termArray) {
             $term = new Term($termArray, $this);
             return $this->_getLatestTerm($term);
@@ -97,7 +97,7 @@ class Api
      */
     public function getTermByFolksaurusId($id)
     {
-        $termArray = $this->_dataMapper->getTermByFolksaurusId($id);
+        $termArray = $this->_dataInterface->getTermByFolksaurusId($id);
         if ($termArray) {
             $term = new Term($termArray, $this);
             return $this->_getLatestTerm($term);
@@ -106,7 +106,7 @@ class Api
             if ($termArray) {
                 $termArray['last_retrieved'] = time();
                 $term = new Term($termArray, $this);
-                $this->_dataMapper->saveTerm($term);
+                $this->_dataInterface->saveTerm($term);
                 return $term;
             }
             return false;
@@ -141,7 +141,7 @@ class Api
             $updatedTermArray['last_retrieved'] = time();
             $updatedTermArray['app_id'] = $term->getAppId();
             $updatedTerm = new Term($updatedTermArray, $this);
-            $this->_dataMapper->saveTerm($updatedTerm);
+            $this->_dataInterface->saveTerm($updatedTerm);
             return $updatedTerm;
         }
         return $term;
