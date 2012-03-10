@@ -118,48 +118,60 @@ class Term
      *
      * @var array $values
      * @param Api $api
+     * @throws Exception  if required keys missing from $values.
      */
     public function __construct(array $values, Api $api)
     {
-        // @todo Check values and throw exception if missing required values.
+        if (!isset($values['name']) || !$values['name']) {
+            throw new Exception('Term must have a value set for name');
+        }
 
-        $this->_id            = $values['id'];
-        $this->_name          = $values['name'];
-        $this->_scopeNote     = $values['scope_note'];
+        $defaultValues = array(
+            'id'             => '',
+            'app_id'         => '',
+            'scope_note'     => '',
+            'last_retrieved' => 0,
+            'broader'        => array(),
+            'narrower'       => array(),
+            'related'        => array(),
+            'used_for'       => array(),
+            'use'            => array(),
+        );
+
+        $termValues = array_merge($defaultValues, $values);
+
         $this->_api           = $api;
+        $this->_id            = $termValues['id'];
+        $this->_name          = $termValues['name'];
+        $this->_scopeNote     = $termValues['scope_note'];
+        $this->_appId         = $termValues['app_id'];
+        $this->_lastRetrieved = $termValues['last_retrieved'];
 
-        if (isset($values['app_id'])) {
-            $this->_appId = $values['app_id'];
-        }
-        if (isset($values['last_retrieved'])) {
-            $this->_lastRetrieved = $values['last_retrieved'];
-        }
-
-        foreach ($values['broader'] as $broader) {
+        foreach ($termValues['broader'] as $broader) {
             $this->_broaderTerms[] = new TermSummary(
                 $broader,
                 $api
             );
         }
-        foreach ($values['narrower'] as $narrower) {
+        foreach ($termValues['narrower'] as $narrower) {
             $this->_narrowerTerms[] = new TermSummary(
                 $narrower,
                 $api
             );
         }
-        foreach ($values['related'] as $related) {
+        foreach ($termValues['related'] as $related) {
             $this->_relatedTerms[] = new TermSummary(
                 $related,
                 $api
             );
         }
-        foreach ($values['used_for'] as $usedFor) {
+        foreach ($termValues['used_for'] as $usedFor) {
             $this->_usedForTerms[] = new TermSummary(
                 $usedFor,
                 $api
             );
         }
-        foreach ($values['use'] as $use) {
+        foreach ($termValues['use'] as $use) {
             $this->_useTerms[] = new TermSummary(
                 $use,
                 $api

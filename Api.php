@@ -118,9 +118,14 @@ class Api
      *
      * If term is current, return it back.
      *
-     * If term is out-of-date, retrieve the latest version, save to DB, and return it.
+     * If term is out-of-date, retrieve the latest version, save to your DB, and return it.
      *
-     * Original term also returned if the request fails.
+     * If Folksaurus ID is not set, search Folksaurus by term name.
+     *
+     * If term does not exist in Folksaurus, add it as a new term.  This will reset
+     * the term info in your database.
+     *
+     * Original term returned if the request fails for any reason.
      *
      * @param Term $term
      * @return Term
@@ -150,9 +155,25 @@ class Api
                 $updatedTerm = new Term($updatedTermArray, $this);
                 $this->_dataInterface->saveTerm($updatedTerm);
                 return $updatedTerm;
-            } else if ($responseCode == 304) {
+            } else if ($responseCode == StatusCodes::NOT_MODIFIED) {
                 $term->updateLastRetrievedTime();
                 $this->_dataInterface->saveTerm($term);
+            } else if ($responseCode == StatusCodes::NOT_FOUND) {
+                $id = $this->_rex->createByName($term->getName());
+                $responseCode = $this->_rex->getLatestResponseCode();
+                if ($id && $responseCode = StatusCodes::CREATED) {
+                    $newTerm = new Term(
+                        array(
+                            'id'             => $id,
+                            'app_id'         => $term->getAppId(),
+                            'name'           => $term->getName(),
+                            'last_retrieved' => time()
+                        ),
+                        $this
+                    );
+                    $this->_dataInterface->saveTerm($newTerm);
+                    return $newTerm;
+                }
             }
         }
         return $term;
