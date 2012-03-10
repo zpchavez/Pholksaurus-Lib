@@ -103,11 +103,9 @@ class Term
      * related
      * used_for
      * use
-     *
-     * and optionally:
-     *
-     * app_id
      * last_retrieved (a UNIX timestamp)
+     *
+     * and optionally (if you know it): app_id
      *
      * Values for the keys between 'broader' and 'use' are arrays
      * where each element is an array with the following keys:
@@ -115,9 +113,7 @@ class Term
      * id (the Folksaurus-assigned ID)
      * name
      *
-     * and optionally:
-     *
-     * app_id
+     * and optionally: app_id
      * </pre>
      *
      * @var array $values
@@ -326,6 +322,16 @@ class Term
     public function getLastRetrievedTime()
     {
         return $this->_lastRetrieved;
+    }
+
+    /**
+     * Set the ID assigned by your application.
+     *
+     * @param mixed $id
+     */
+    public function setAppId($id)
+    {
+        $this->_appId = $id;
     }
 
     /**
