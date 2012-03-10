@@ -131,18 +131,29 @@ class Api
         $now = time();
         $secondsSinceUpdate = ($now - $lastRetrievedTime);
         if ($secondsSinceUpdate > $this->_config['expire_time']) {
-            $updatedTermArray = $this->_rex->getByIdIfModifiedSince(
-                $term->getId(),
-                $lastRetrievedTime
-            );
-            if (!$updatedTermArray) {
-                return $term;
+            // If Folksaurus ID is known, search by that.
+            if ($term->getId()) {
+                $updatedTermArray = $this->_rex->getByIdIfModifiedSince(
+                    $term->getId(),
+                    $lastRetrievedTime
+                );
+            } else { // Otherwise search by name.
+                $updatedTermArray = $this->_rex->getByName(
+                    $term->getName(),
+                    $lastRetrievedTime
+                );
             }
-            $updatedTermArray['last_retrieved'] = time();
-            $updatedTermArray['app_id'] = $term->getAppId();
-            $updatedTerm = new Term($updatedTermArray, $this);
-            $this->_dataInterface->saveTerm($updatedTerm);
-            return $updatedTerm;
+            $responseCode = $this->_rex->getLatestResponseCode();
+            if ($updatedTermArray) {
+                $updatedTermArray['last_retrieved'] = time();
+                $updatedTermArray['app_id'] = $term->getAppId();
+                $updatedTerm = new Term($updatedTermArray, $this);
+                $this->_dataInterface->saveTerm($updatedTerm);
+                return $updatedTerm;
+            } else if ($responseCode == 304) {
+                $term->updateLastRetrievedTime();
+                $this->_dataInterface->saveTerm($term);
+            }
         }
         return $term;
     }

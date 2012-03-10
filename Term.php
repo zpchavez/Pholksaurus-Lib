@@ -335,6 +335,14 @@ class Term
     }
 
     /**
+     * Update last retrieved time to the current time.
+     */
+    public function updateLastRetrievedTime()
+    {
+        $this->_lastRetrieved = time();
+    }
+
+    /**
      * Get the name.
      *
      * @return string
