@@ -329,11 +329,23 @@ class Term
     /**
      * Get the timestamp from when the term details were last retrieved from Folksaurus.
      *
-     * @return string
+     * @return int
      */
     public function getLastRetrievedTime()
     {
         return $this->_lastRetrieved;
+    }
+
+    /**
+     * Get the last retrieved timestamp as a datetime string.
+     *
+     * The datetime will use the current default timezone.
+     *
+     * @return string
+     */
+    public function getLastRetrievedDatetime()
+    {
+        return date('Y-m-d H:i:s', $this->_lastRetrieved);
     }
 
     /**

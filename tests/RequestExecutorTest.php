@@ -28,10 +28,11 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
     public function testGetById()
     {
         $mockCurl = $this->getMock('Curl');
-        // Init called on object with url to term resource.
+        // URL is set.
         $mockCurl->expects($this->at(0))
-            ->method('init')
+            ->method('__set')
             ->with(
+                $this->equalTo('url'),
                 $this->equalTo(
                     sprintf(
                         RequestExecutor::RES_TERM_BY_ID,
@@ -72,10 +73,11 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
     public function testGetByIdIfModifiedSince()
     {
         $mockCurl = $this->getMock('Curl');
-        // Init called on object with url to term resource.
+        // URL is set.
         $mockCurl->expects($this->at(0))
-            ->method('init')
+            ->method('__set')
             ->with(
+                $this->equalTo('url'),
                 $this->equalTo(
                     sprintf(
                         RequestExecutor::RES_TERM_BY_ID,
@@ -149,10 +151,11 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
     public function testGetByName()
     {
         $mockCurl = $this->getMock('Curl');
-        // Init called on object with url to term resource.
+        // URL is set.
         $mockCurl->expects($this->at(0))
-            ->method('init')
+            ->method('__set')
             ->with(
+                $this->equalTo('url'),
                 $this->equalTo(
                     sprintf(
                         RequestExecutor::RES_TERM_BY_NAME,
@@ -193,10 +196,11 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
     public function testGetByNameIfModifiedSince()
     {
         $mockCurl = $this->getMock('Curl');
-        // Init called on object with url to term resource.
+        // URL is set.
         $mockCurl->expects($this->at(0))
-            ->method('init')
+            ->method('__set')
             ->with(
+                $this->equalTo('url'),
                 $this->equalTo(
                     sprintf(
                         RequestExecutor::RES_TERM_BY_NAME,
@@ -269,10 +273,11 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
     public function testCreateByName()
     {
         $mockCurl = $this->getMock('Curl');
-        // Init called on object with url to term resource.
+        // URL is set.
         $mockCurl->expects($this->at(0))
-            ->method('init')
+            ->method('__set')
             ->with(
+                $this->equalTo('url'),
                 $this->equalTo(
                     sprintf(
                         RequestExecutor::RES_TERM_BY_NAME,
@@ -331,10 +336,11 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
     {
         // Acts just like getByName if the name returns a result.
         $mockCurl = $this->getMock('Curl');
-        // Init called on object with url to term resource.
+        // URL is set.
         $mockCurl->expects($this->at(0))
-            ->method('init')
+            ->method('__set')
             ->with(
+                $this->equalTo('url'),
                 $this->equalTo(
                     sprintf(
                         RequestExecutor::RES_TERM_BY_NAME,
@@ -383,15 +389,12 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(404));
 
-                // Response code retrieved.
+
+        // URL is set.
         $mockCurl->expects($this->at(4))
-            ->method('close');
-
-
-        // Init called on object with url to term resource.
-        $mockCurl->expects($this->at(5))
-            ->method('init')
+            ->method('__set')
             ->with(
+                $this->equalTo('url'),
                 $this->equalTo(
                     sprintf(
                         RequestExecutor::RES_TERM_BY_NAME,
@@ -402,7 +405,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             );
 
         // Method set to PUT.
-        $mockCurl->expects($this->at(6))
+        $mockCurl->expects($this->at(5))
             ->method('__set')
             ->with(
                 $this->equalTo('customrequest'),
@@ -414,7 +417,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             'Content-Length: 0',
             sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
         );
-        $mockCurl->expects($this->at(7))
+        $mockCurl->expects($this->at(6))
             ->method('__set')
             ->with(
                 $this->equalTo('httpheader'),
@@ -422,7 +425,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             );
 
         // Post fields are blank, since all necessary info is in the URL.
-        $mockCurl->expects($this->at(8))
+        $mockCurl->expects($this->at(7))
             ->method('__set')
             ->with(
                 $this->equalTo('postfields'),
@@ -430,20 +433,23 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             );
 
         // Results fetched and ID returned.
-        $mockCurl->expects($this->at(9))
+        $mockCurl->expects($this->at(8))
             ->method('fetch')
             ->will($this->returnValue(1));
 
         // Response code retrieved.
-        $mockCurl->expects($this->at(10))
+        $mockCurl->expects($this->at(9))
             ->method('info')
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(201));
 
         // After the term is created it is fetched.
-        $mockCurl->expects($this->at(11))
-            ->method('init')
+
+        // URL changed.
+        $mockCurl->expects($this->at(10))
+            ->method('__set')
             ->with(
+                $this->equalTo('url'),
                 $this->equalTo(
                     sprintf(
                         RequestExecutor::RES_TERM_BY_ID,
@@ -457,7 +463,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         $headers = array(
             sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
         );
-        $mockCurl->expects($this->at(12))
+        $mockCurl->expects($this->at(11))
             ->method('__set')
             ->with(
                 $this->equalTo('httpheader'),
@@ -465,13 +471,13 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             );
 
         // JSON fetched.
-        $mockCurl->expects($this->at(13))
+        $mockCurl->expects($this->at(12))
             ->method('fetch_json')
             ->with($this->equalTo(true))
             ->will($this->returnValue($this->_getFooTermArray()));
 
         // Response code retrieved.
-        $mockCurl->expects($this->at(14))
+        $mockCurl->expects($this->at(13))
             ->method('info')
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(200));
@@ -483,10 +489,11 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
     public function testGetByTermList()
     {
         $mockCurl = $this->getMock('Curl');
-        // Init called on object with url to term resource.
+        // URL is set.
         $mockCurl->expects($this->at(0))
-            ->method('init')
+            ->method('__set')
             ->with(
+                $this->equalTo('url'),
                 $this->equalTo(
                     sprintf(
                         RequestExecutor::RES_TERM_LIST,

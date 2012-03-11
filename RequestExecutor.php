@@ -57,7 +57,7 @@ class RequestExecutor
         $this->_apiKey = $apiKey;
         $this->_url = trim($url, '/ ');
         if ($curlObj === null) {
-            $this->_curlObj = new \Curl($url);
+            $this->_curlObj = new \Curl();
         } else {
             $this->_curlObj = $curlObj;
         }
@@ -87,7 +87,7 @@ class RequestExecutor
     }
 
     /**
-     * Add the specified headers plus the authorization header to the handle.
+     * Set the specified headers plus the authorization header to the handle.
      *
      * @param Curl $handle   A Curl object.
      * @param array $headers
@@ -113,7 +113,7 @@ class RequestExecutor
      */
     protected function _executeGetRequest($uri, $ifModifiedSince = null)
     {
-        $this->_curlObj->init($uri);
+        $this->_curlObj->url = $uri;
         if ($ifModifiedSince) {
             $additionalHeaders = array(
                 'If-Modified-Since: ' . gmdate('D, d M Y H:i:s \G\M\T', $ifModifiedSince)
@@ -125,7 +125,6 @@ class RequestExecutor
         $response = $this->_curlObj->fetch_json(true);
         $responseCode = $this->_curlObj->info('HTTP_CODE');
         $this->_latestResponseCode = $responseCode;
-        $this->_curlObj->close();
         return $response;
     }
 
@@ -230,7 +229,7 @@ class RequestExecutor
             $this->_url,
             rawurlencode($name)
         );
-        $this->_curlObj->init($uri);
+        $this->_curlObj->url = $uri;
         $this->_curlObj->customrequest = 'PUT';
         $this->_addHeaders(array('Content-Length: 0'));
         $this->_curlObj->postfields = '';
