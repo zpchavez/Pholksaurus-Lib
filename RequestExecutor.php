@@ -222,7 +222,7 @@ class RequestExecutor
      *                      created term.  If the term already exists,
      *                      the ID of that term.  Otherwise false.
      */
-    public function createByName($name)
+    public function create($name)
     {
         $uri = sprintf(
             self::RES_TERM_BY_NAME,
@@ -250,7 +250,7 @@ class RequestExecutor
         if ($termArray) {
             return $termArray;
         }
-        $id = $this->createByName($name);
+        $id = $this->create($name);
         if ($id) {
             return $this->getById($id);
         }

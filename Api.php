@@ -114,6 +114,30 @@ class Api
     }
 
     /**
+     * Get a term by its name.  If it doesn't exist, create it.
+     *
+     * @param string $name
+     * @return Term|bool  False if unable to get or create term.
+     */
+    public function getOrCreateTerm($name)
+    {
+        $termArray = $this->_dataInterface->getTermByName($name);
+        if ($termArray) {
+            $term = new Term($termArray, $this);
+            return $this->_getLatestTerm($term);
+        } else {
+            $termArray = $this->_rex->getOrCreate($name);
+            if ($termArray) {
+                $termArray['last_retrieved'] = time();
+                $term = new Term($termArray, $this);
+                $this->_dataInterface->saveTerm($term);
+                return $term;
+            }
+            return false;
+        }
+    }
+
+    /**
      * Get the latest data for $term and return an updated Term object.
      *
      * If term is current, return it back.
@@ -159,7 +183,7 @@ class Api
                 $term->updateLastRetrievedTime();
                 $this->_dataInterface->saveTerm($term);
             } else if ($responseCode == StatusCodes::NOT_FOUND) {
-                $id = $this->_rex->createByName($term->getName());
+                $id = $this->_rex->create($term->getName());
                 $responseCode = $this->_rex->getLatestResponseCode();
                 if ($id && $responseCode = StatusCodes::CREATED) {
                     $newTerm = new Term(

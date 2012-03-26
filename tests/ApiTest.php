@@ -241,7 +241,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(StatusCodes::NOT_FOUND));
 
         $mockRex->expects($this->at(2))
-            ->method('createByName')
+            ->method('create')
             ->with($this->equalTo('Foo'))
             ->will($this->returnValue(self::FOO_FOLKSAURUS_ID));
 
@@ -403,4 +403,107 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('A term.', $term->getScopeNote());
         $this->assertTrue($term->getLastRetrievedTime() > 0);
     }
+
+    public function testGetOrCreateTermGetsTermFromDbIfItExistsAndIsCurrent()
+    {
+        $mockDI  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+
+        $fooTermArray = $this->_getFooTermArray();
+        $fooTermArray['last_retrieved'] = time();
+
+        $mockDI->expects($this->once())
+            ->method('getTermByName')
+            ->with($this->equalTo('Foo'))
+            ->will($this->returnValue($fooTermArray));
+
+        // Won't send a request to Folksaurus, because term was retrieved recently.
+        $mockRex->expects($this->never())
+            ->method('getByNameIfModifiedSince');
+        $mockRex->expects($this->never())
+            ->method('getByIdIfModifiedSince');
+        $mockRex->expects($this->never())
+            ->method('getOrCreate');
+        $mockRex->expects($this->never())
+            ->method('create');
+
+        // Won't save, because no changes were retrieved.
+        $mockDI->expects($this->never())
+            ->method('saveTerm');
+
+        $api = new Api($mockDI, $mockRex, CONFIG_PATH);
+        $term = $api->getOrCreateTerm('Foo');
+
+        $this->assertTrue($term instanceof Term);
+        $this->assertEquals('Foo', $term->getName());
+        $this->assertEquals(self::FOO_FOLKSAURUS_ID, $term->getId());
+        $this->assertEquals(self::FOO_APP_ID, $term->getAppId());
+    }
+
+    public function testGetOrCreateTermGetsLatestVersionOfTermIfItExistsInDbButIsPassedExpireTime()
+    {
+        $mockDI  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+
+        $yesterday = time() - (60 * 60 * 24);
+        $fooTermArray = $this->_getFooTermArray();
+        $fooTermArray['last_retrieved'] = $yesterday;
+
+        $mockDI->expects($this->once())
+            ->method('getTermByName')
+            ->with($this->equalTo('Foo'))
+            ->will($this->returnValue($fooTermArray));
+
+        $updatedFooTermArray = $fooTermArray;
+        $updatedFooTermArray['scope_note'] = 'Updated scope note';
+
+        $mockRex->expects($this->once())
+            ->method('getByIdIfModifiedSince')
+            ->with(
+                $this->equalTo(self::FOO_FOLKSAURUS_ID),
+                $this->equalTo($yesterday)
+            )->will($this->returnValue($updatedFooTermArray));
+
+        $mockDI->expects($this->once())
+            ->method('saveTerm')
+            ->with($this->isInstanceOf('Folksaurus\Term'));
+
+        $api = new Api($mockDI, $mockRex, CONFIG_PATH);
+        $term = $api->getOrCreateTerm('Foo');
+
+        $this->assertTrue($term instanceof Term);
+        $this->assertEquals('Foo', $term->getName());
+        $this->assertEquals('Updated scope note', $term->getScopeNote());
+        $this->assertEquals(self::FOO_FOLKSAURUS_ID, $term->getId());
+        $this->assertEquals(self::FOO_APP_ID, $term->getAppId());
+    }
+
+    public function testGetOrCreateTermGetsOrCreatesTermInFolksaurusThenAddsItToTheDb()
+    {
+        $mockDI  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+
+        $mockDI->expects($this->once())
+            ->method('getTermByName')
+            ->with($this->equalTo('Foo'))
+            ->will($this->returnValue(false));
+
+        $mockRex->expects($this->once())
+            ->method('getOrCreate')
+            ->with('Foo')
+            ->will($this->returnValue($this->_getFooTermArray()));
+
+        $mockDI->expects($this->once())
+            ->method('saveTerm')
+            ->with($this->isInstanceOf('Folksaurus\Term'));
+
+        $api = new Api($mockDI, $mockRex, CONFIG_PATH);
+        $term = $api->getOrCreateTerm('Foo');
+
+        $this->assertTrue($term instanceof Term);
+        $this->assertEquals('Foo', $term->getName());
+        $this->assertEquals(self::FOO_FOLKSAURUS_ID, $term->getId());
+        $this->assertEquals(self::FOO_APP_ID, $term->getAppId());
+    }
+
 }

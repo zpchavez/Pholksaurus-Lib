@@ -270,7 +270,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(200, $rex->getLatestResponseCode());
     }
 
-    public function testCreateByName()
+    public function testCreate()
     {
         $mockCurl = $this->getMock('Curl');
         // URL is set.
@@ -327,7 +327,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(201));
 
         $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
-        $id = $rex->createByName('Foo');
+        $id = $rex->create('Foo');
         $this->assertEquals(1, $id);
         $this->assertEquals(201, $rex->getLatestResponseCode());
     }

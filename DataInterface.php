@@ -25,6 +25,15 @@ interface DataInterface
     public function getTermByFolksaurusId($id);
 
     /**
+     * Retrieve a term by its name.
+     *
+     * @param string $name
+     * @return array  A term info array suitable for passing into the Term constructor,
+     *                or false if not found.
+     */
+    public function getTermByName($name);
+
+    /**
      * Save a term to your database.
      *
      * The term may be new, or it may be an update of a term
