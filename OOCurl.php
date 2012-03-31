@@ -222,7 +222,7 @@ class Curl
      */
     public function fetch_json ( $array = false )
     {
-        return json_decode($this->fetch(), $array);
+        return json_decode($this->exec(), $array);
     }
 
 

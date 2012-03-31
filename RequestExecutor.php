@@ -233,7 +233,7 @@ class RequestExecutor
         $this->_curlObj->customrequest = 'PUT';
         $this->_addHeaders(array('Content-Length: 0'));
         $this->_curlObj->postfields = '';
-        $id = $this->_curlObj->fetch(true);
+        $id = $this->_curlObj->exec();
         $this->_latestResponseCode = $this->_curlObj->info('HTTP_CODE');
         return $id;
     }

@@ -317,7 +317,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
 
         // Results fetched and ID returned.
         $mockCurl->expects($this->at(4))
-            ->method('fetch')
+            ->method('exec')
             ->will($this->returnValue(1));
 
         // Response code retrieved.
@@ -434,7 +434,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
 
         // Results fetched and ID returned.
         $mockCurl->expects($this->at(8))
-            ->method('fetch')
+            ->method('exec')
             ->will($this->returnValue(1));
 
         // Response code retrieved.
