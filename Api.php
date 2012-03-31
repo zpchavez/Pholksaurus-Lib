@@ -125,16 +125,23 @@ class Api
         if ($termArray) {
             $term = new Term($termArray, $this);
             return $this->_getLatestTerm($term);
-        } else {
-            $termArray = $this->_rex->getOrCreate($name);
-            if ($termArray) {
-                $termArray['last_retrieved'] = time();
-                $term = new Term($termArray, $this);
-                $this->_dataInterface->saveTerm($term);
-                return $term;
-            }
-            return false;
         }
+        $termArray = $this->_rex->getOrCreate($name);
+        if ($termArray) {
+            $termArray['last_retrieved'] = time();
+            $term = new Term($termArray, $this);
+            $this->_dataInterface->saveTerm($term);
+            return $term;
+        }
+        $term = new Term(
+            array(
+                'name'           => $name,
+                'last_retrieved' => 0
+            ),
+            $this
+        );
+        $this->_dataInterface->saveTerm($term);
+        return $term;
     }
 
     /**

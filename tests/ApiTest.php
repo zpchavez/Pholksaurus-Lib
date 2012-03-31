@@ -506,4 +506,31 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(self::FOO_APP_ID, $term->getAppId());
     }
 
+    public function testGetOrCreateTermCreatesTermLocallyIfUnableToCreateItInFolksaurus()
+    {
+        $mockDI  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+
+        $mockDI->expects($this->once())
+            ->method('getTermByName')
+            ->with($this->equalTo('Foo'))
+            ->will($this->returnValue(false));
+
+        $mockRex->expects($this->once())
+            ->method('getOrCreate')
+            ->with('Foo')
+            ->will($this->returnValue(false));
+
+        $mockDI->expects($this->once())
+            ->method('saveTerm')
+            ->with($this->isInstanceOf('Folksaurus\Term'));
+
+        $api = new Api($mockDI, $mockRex, CONFIG_PATH);
+        $term = $api->getOrCreateTerm('Foo');
+
+        $this->assertTrue($term instanceof Term);
+        $this->assertEquals('Foo', $term->getName());
+        $this->assertEquals('', $term->getId());
+    }
+
 }
