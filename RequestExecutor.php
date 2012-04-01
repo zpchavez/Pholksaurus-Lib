@@ -114,6 +114,7 @@ class RequestExecutor
     protected function _executeGetRequest($uri, $ifModifiedSince = null)
     {
         $this->_curlObj->url = $uri;
+        $this->_curlObj->customrequest = 'GET';
         if ($ifModifiedSince) {
             $additionalHeaders = array(
                 'If-Modified-Since: ' . gmdate('D, d M Y H:i:s \G\M\T', $ifModifiedSince)

@@ -42,11 +42,18 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
                 )
             );
 
+        $mockCurl->expects($this->at(1))
+            ->method('__set')
+            ->with(
+                $this->equalTo('customrequest'),
+                $this->equalTo('GET')
+            );
+
         // Authorization header set.
         $headers = array(
             sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
         );
-        $mockCurl->expects($this->at(1))
+        $mockCurl->expects($this->at(2))
             ->method('__set')
             ->with(
                 $this->equalTo('httpheader'),
@@ -54,13 +61,13 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             );
 
         // JSON fetched.
-        $mockCurl->expects($this->at(2))
+        $mockCurl->expects($this->at(3))
             ->method('fetch_json')
             ->with($this->equalTo(true))
             ->will($this->returnValue($this->_getFooTermArray()));
 
         // Response code retrieved.
-        $mockCurl->expects($this->at(3))
+        $mockCurl->expects($this->at(4))
             ->method('info')
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(200));
@@ -87,12 +94,19 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
                 )
             );
 
+        $mockCurl->expects($this->at(1))
+            ->method('__set')
+            ->with(
+                $this->equalTo('customrequest'),
+                $this->equalTo('GET')
+            );
+
         // Authorization header and if-modified-since header set.
         $headers = array(
         'If-Modified-Since: ' . gmdate('D, d M Y H:i:s \G\M\T', time()),
             sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
         );
-        $mockCurl->expects($this->at(1))
+        $mockCurl->expects($this->at(2))
             ->method('__set')
             ->with(
                 $this->equalTo('httpheader'),
@@ -100,13 +114,13 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             );
 
         // JSON fetched.
-        $mockCurl->expects($this->at(2))
+        $mockCurl->expects($this->at(3))
             ->method('fetch_json')
             ->with($this->equalTo(true))
             ->will($this->returnValue(NULL));
 
         // Response code retrieved.
-        $mockCurl->expects($this->at(3))
+        $mockCurl->expects($this->at(4))
             ->method('info')
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(304));
@@ -121,7 +135,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         // False also returned if response is NULL because the term was not found at all.
 
         // Response code retrieved.
-        $mockCurl->expects($this->at(3))
+        $mockCurl->expects($this->at(4))
             ->method('info')
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(404));
@@ -132,12 +146,12 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
 
         // If term is found and has been modified, the term array is returned.
 
-        $mockCurl->expects($this->at(2))
+        $mockCurl->expects($this->at(3))
             ->method('fetch_json')
             ->with($this->equalTo(true))
             ->will($this->returnValue($this->_getFooTermArray()));
 
-        $mockCurl->expects($this->at(3))
+        $mockCurl->expects($this->at(4))
             ->method('info')
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(200));
@@ -165,11 +179,18 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
                 )
             );
 
+        $mockCurl->expects($this->at(1))
+            ->method('__set')
+            ->with(
+                $this->equalTo('customrequest'),
+                $this->equalTo('GET')
+            );
+
         // Authorization header set.
         $headers = array(
             sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
         );
-        $mockCurl->expects($this->at(1))
+        $mockCurl->expects($this->at(2))
             ->method('__set')
             ->with(
                 $this->equalTo('httpheader'),
@@ -177,13 +198,13 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             );
 
         // JSON fetched.
-        $mockCurl->expects($this->at(2))
+        $mockCurl->expects($this->at(3))
             ->method('fetch_json')
             ->with($this->equalTo(true))
             ->will($this->returnValue($this->_getFooTermArray()));
 
         // Response code retrieved.
-        $mockCurl->expects($this->at(3))
+        $mockCurl->expects($this->at(4))
             ->method('info')
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(200));
@@ -210,12 +231,19 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
                 )
             );
 
+        $mockCurl->expects($this->at(1))
+            ->method('__set')
+            ->with(
+                $this->equalTo('customrequest'),
+                $this->equalTo('GET')
+            );
+
         // Authorization header and if-modified-since header set.
         $headers = array(
         'If-Modified-Since: ' . gmdate('D, d M Y H:i:s \G\M\T', time()),
             sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
         );
-        $mockCurl->expects($this->at(1))
+        $mockCurl->expects($this->at(2))
             ->method('__set')
             ->with(
                 $this->equalTo('httpheader'),
@@ -223,13 +251,13 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             );
 
         // JSON fetched.
-        $mockCurl->expects($this->at(2))
+        $mockCurl->expects($this->at(3))
             ->method('fetch_json')
             ->with($this->equalTo(true))
             ->will($this->returnValue(NULL));
 
         // Response code retrieved.
-        $mockCurl->expects($this->at(3))
+        $mockCurl->expects($this->at(4))
             ->method('info')
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(304));
@@ -243,7 +271,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         // False also returned if response is NULL because the term was not found at all.
 
         // Response code retrieved.
-        $mockCurl->expects($this->at(3))
+        $mockCurl->expects($this->at(4))
             ->method('info')
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(404));
@@ -254,12 +282,12 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
 
         // If term is found and has been modified, the term array is returned.
 
-        $mockCurl->expects($this->at(2))
+        $mockCurl->expects($this->at(3))
             ->method('fetch_json')
             ->with($this->equalTo(true))
             ->will($this->returnValue($this->_getFooTermArray()));
 
-        $mockCurl->expects($this->at(3))
+        $mockCurl->expects($this->at(4))
             ->method('info')
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(200));
@@ -350,11 +378,18 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
                 )
             );
 
+        $mockCurl->expects($this->at(1))
+            ->method('__set')
+            ->with(
+                $this->equalTo('customrequest'),
+                $this->equalTo('GET')
+            );
+
         // Authorization header set.
         $headers = array(
             sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
         );
-        $mockCurl->expects($this->at(1))
+        $mockCurl->expects($this->at(2))
             ->method('__set')
             ->with(
                 $this->equalTo('httpheader'),
@@ -362,13 +397,13 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             );
 
         // JSON fetched.
-        $mockCurl->expects($this->at(2))
+        $mockCurl->expects($this->at(3))
             ->method('fetch_json')
             ->with($this->equalTo(true))
             ->will($this->returnValue($this->_getFooTermArray()));
 
         // Response code retrieved.
-        $mockCurl->expects($this->at(3))
+        $mockCurl->expects($this->at(4))
             ->method('info')
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(200));
@@ -378,20 +413,20 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->_getFooTermArray(), $termArray);
 
         // But if no term is found, it creates it.
-        $mockCurl->expects($this->at(2))
+        $mockCurl->expects($this->at(3))
             ->method('fetch_json')
             ->with($this->equalTo(true))
             ->will($this->returnValue(NULL));
 
         // Response code retrieved.
-        $mockCurl->expects($this->at(3))
+        $mockCurl->expects($this->at(4))
             ->method('info')
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(404));
 
 
         // URL is set.
-        $mockCurl->expects($this->at(4))
+        $mockCurl->expects($this->at(5))
             ->method('__set')
             ->with(
                 $this->equalTo('url'),
@@ -405,7 +440,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             );
 
         // Method set to PUT.
-        $mockCurl->expects($this->at(5))
+        $mockCurl->expects($this->at(6))
             ->method('__set')
             ->with(
                 $this->equalTo('customrequest'),
@@ -417,7 +452,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             'Content-Length: 0',
             sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
         );
-        $mockCurl->expects($this->at(6))
+        $mockCurl->expects($this->at(7))
             ->method('__set')
             ->with(
                 $this->equalTo('httpheader'),
@@ -425,7 +460,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             );
 
         // Post fields are blank, since all necessary info is in the URL.
-        $mockCurl->expects($this->at(7))
+        $mockCurl->expects($this->at(8))
             ->method('__set')
             ->with(
                 $this->equalTo('postfields'),
@@ -433,12 +468,12 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             );
 
         // Results fetched and ID returned.
-        $mockCurl->expects($this->at(8))
+        $mockCurl->expects($this->at(9))
             ->method('exec')
             ->will($this->returnValue(1));
 
         // Response code retrieved.
-        $mockCurl->expects($this->at(9))
+        $mockCurl->expects($this->at(10))
             ->method('info')
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(201));
@@ -446,7 +481,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         // After the term is created it is fetched.
 
         // URL changed.
-        $mockCurl->expects($this->at(10))
+        $mockCurl->expects($this->at(11))
             ->method('__set')
             ->with(
                 $this->equalTo('url'),
@@ -459,11 +494,18 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
                 )
             );
 
+        $mockCurl->expects($this->at(12))
+            ->method('__set')
+            ->with(
+                $this->equalTo('customrequest'),
+                $this->equalTo('GET')
+            );
+
         // Authorization header set.
         $headers = array(
             sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
         );
-        $mockCurl->expects($this->at(11))
+        $mockCurl->expects($this->at(13))
             ->method('__set')
             ->with(
                 $this->equalTo('httpheader'),
@@ -471,13 +513,13 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             );
 
         // JSON fetched.
-        $mockCurl->expects($this->at(12))
+        $mockCurl->expects($this->at(14))
             ->method('fetch_json')
             ->with($this->equalTo(true))
             ->will($this->returnValue($this->_getFooTermArray()));
 
         // Response code retrieved.
-        $mockCurl->expects($this->at(13))
+        $mockCurl->expects($this->at(15))
             ->method('info')
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(200));
@@ -504,11 +546,18 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
                 )
             );
 
+        $mockCurl->expects($this->at(1))
+            ->method('__set')
+            ->with(
+                $this->equalTo('customrequest'),
+                $this->equalTo('GET')
+            );
+
         // Authorization header set.
         $headers = array(
             sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
         );
-        $mockCurl->expects($this->at(1))
+        $mockCurl->expects($this->at(2))
             ->method('__set')
             ->with(
                 $this->equalTo('httpheader'),
@@ -516,7 +565,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             );
 
         // JSON fetched.
-        $mockCurl->expects($this->at(2))
+        $mockCurl->expects($this->at(3))
             ->method('fetch_json')
             ->with($this->equalTo(true))
             ->will(
@@ -529,7 +578,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             );
 
         // Response code retrieved.
-        $mockCurl->expects($this->at(3))
+        $mockCurl->expects($this->at(4))
             ->method('info')
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(200));
