@@ -10,10 +10,8 @@ class RequestExecutor
 {
     // Resource URL patterns.
     // In each pattern, the first %s will be replaced with the value of $this->_url.
-    // For term list, the 2nd %s is a search string and the %d is a limit number.
     const RES_TERM_BY_ID   = '%s/api/term/id/%s/';
     const RES_TERM_BY_NAME = '%s/api/term/%s/';
-    const RES_TERM_LIST    = '%s/api/term-list/%s/%d/';
 
     const AUTHORIZATION_HEADER = 'X-Folksaurus-Authorization: %s'; // %s is the API key
 
@@ -258,27 +256,4 @@ class RequestExecutor
         return false;
     }
 
-    /**
-     * Get an array of arrays with keys 'id' and 'name' for terms
-     * whose names start with $query.
-     *
-     * @param string $query
-     * @param int $limit
-     * @return array
-     */
-    public function getTermList($query, $limit = 25)
-    {
-        $uri = sprintf(
-            self::RES_TERM_LIST,
-            $this->_url,
-            rawurlencode($query),
-            $limit
-        );
-        $termArrays = $this->_executeGetRequest($uri);
-        $termList = array();
-        foreach ($termArrays as $termArray) {
-            $termList[] = $termArray;
-        }
-        return $termList;
-    }
 }
