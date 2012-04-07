@@ -102,7 +102,7 @@ class Api
             $term = new Term($termArray, $this);
             return $this->_getLatestTerm($term);
         } else {
-            $termArray = $this->_rex->getById($id);
+            $termArray = $this->_rex->getTermById($id);
             if ($termArray) {
                 $termArray['last_retrieved'] = time();
                 $term = new Term($termArray, $this);
@@ -126,7 +126,7 @@ class Api
             $term = new Term($termArray, $this);
             return $this->_getLatestTerm($term);
         }
-        $termArray = $this->_rex->getOrCreate($name);
+        $termArray = $this->_rex->getOrCreateTerm($name);
         if ($termArray) {
             $termArray['last_retrieved'] = time();
             $term = new Term($termArray, $this);
@@ -169,12 +169,12 @@ class Api
         if ($secondsSinceUpdate > $this->_config['expire_time']) {
             // If Folksaurus ID is known, search by that.
             if ($term->getId()) {
-                $updatedTermArray = $this->_rex->getByIdIfModifiedSince(
+                $updatedTermArray = $this->_rex->getTermByIdIfModifiedSince(
                     $term->getId(),
                     $lastRetrievedTime
                 );
             } else { // Otherwise search by name.
-                $updatedTermArray = $this->_rex->getByName(
+                $updatedTermArray = $this->_rex->getTermByName(
                     $term->getName(),
                     $lastRetrievedTime
                 );
@@ -190,7 +190,7 @@ class Api
                 $term->updateLastRetrievedTime();
                 $this->_dataInterface->saveTerm($term);
             } else if ($responseCode == StatusCodes::NOT_FOUND) {
-                $id = $this->_rex->create($term->getName());
+                $id = $this->_rex->createTerm($term->getName());
                 $responseCode = $this->_rex->getLatestResponseCode();
                 if ($id && $responseCode = StatusCodes::CREATED) {
                     $newTerm = new Term(

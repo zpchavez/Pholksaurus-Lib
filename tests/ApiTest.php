@@ -42,9 +42,9 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 
         // Won't send a request to Folksaurus, because the ID is unknown.
         $mockRex->expects($this->never())
-            ->method('getById');
+            ->method('getTermById');
         $mockRex->expects($this->never())
-            ->method('getByIdIfModifiedSince');
+            ->method('getTermByIdIfModifiedSince');
 
         $api = new Api($mockDI, $mockRex, CONFIG_PATH);
         $term = $api->getTermByAppId(StatusCodes::NOT_FOUND);
@@ -68,9 +68,9 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 
         // Won't send a request to Folksaurus, because term was retrieved recently.
         $mockRex->expects($this->never())
-            ->method('getById');
+            ->method('getTermById');
         $mockRex->expects($this->never())
-            ->method('getByIdIfModifiedSince');
+            ->method('getTermByIdIfModifiedSince');
 
         // Won't save, because no changes were retrieved.
         $mockDI->expects($this->never())
@@ -104,7 +104,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 
         // Term is expired, so send request for latest info.
         $mockRex->expects($this->once())
-            ->method('getByIdIfModifiedSince')
+            ->method('getTermByIdIfModifiedSince')
             ->with(
                 $this->equalTo(self::FOO_FOLKSAURUS_ID),
                 $this->equalTo($yesterday)
@@ -144,7 +144,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         // Term is expired, so send request for latest info.
         // False returned since there was no content in the body of the response.
         $mockRex->expects($this->once())
-            ->method('getByIdIfModifiedSince')
+            ->method('getTermByIdIfModifiedSince')
             ->with(
                 $this->equalTo(self::FOO_FOLKSAURUS_ID),
                 $this->equalTo($yesterday)
@@ -192,7 +192,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 
         // Term is expired, so send request for latest info.
         $mockRex->expects($this->once())
-            ->method('getByName')
+            ->method('getTermByName')
             ->with($this->equalTo('Foo'))
             ->will($this->returnValue($updatedFooTermArray));
 
@@ -232,7 +232,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 
         // Term is expired, so send request for latest info.
         $mockRex->expects($this->at(0))
-            ->method('getByName')
+            ->method('getTermByName')
             ->with($this->equalTo('Foo'))
             ->will($this->returnValue(false));
 
@@ -241,7 +241,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(StatusCodes::NOT_FOUND));
 
         $mockRex->expects($this->at(2))
-            ->method('create')
+            ->method('createTerm')
             ->with($this->equalTo('Foo'))
             ->will($this->returnValue(self::FOO_FOLKSAURUS_ID));
 
@@ -277,7 +277,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 
         // Term not found, so send a request to Folksaurus for it.
         $mockRex->expects($this->once())
-            ->method('getById')
+            ->method('getTermById')
             ->with($this->equalTo(self::FOO_FOLKSAURUS_ID))
             ->will($this->returnValue($this->_getFooTermArray()));
 
@@ -312,7 +312,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 
         // Won't send a request to Folksaurus, because term was retrieved recently.
         $mockRex->expects($this->never())
-            ->method('getById');
+            ->method('getTermById');
 
         // Won't save, because no changes were retrieved.
         $mockDI->expects($this->never())
@@ -346,7 +346,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 
         // Term is expired, so send request for latest info.
         $mockRex->expects($this->once())
-            ->method('getByIdIfModifiedSince')
+            ->method('getTermByIdIfModifiedSince')
             ->with($this->equalTo(self::FOO_FOLKSAURUS_ID))
             ->will($this->returnValue($updatedFooTermArray));
 
@@ -385,7 +385,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 
         // Term is expired, so send request for latest info.
         $mockRex->expects($this->once())
-            ->method('getByIdIfModifiedSince')
+            ->method('getTermByIdIfModifiedSince')
             ->with($this->equalTo(self::FOO_FOLKSAURUS_ID))
             ->will($this->returnValue(false));
 
@@ -419,13 +419,13 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 
         // Won't send a request to Folksaurus, because term was retrieved recently.
         $mockRex->expects($this->never())
-            ->method('getByNameIfModifiedSince');
+            ->method('getTermByNameIfModifiedSince');
         $mockRex->expects($this->never())
-            ->method('getByIdIfModifiedSince');
+            ->method('getTermByIdIfModifiedSince');
         $mockRex->expects($this->never())
-            ->method('getOrCreate');
+            ->method('getOrCreateTerm');
         $mockRex->expects($this->never())
-            ->method('create');
+            ->method('createTerm');
 
         // Won't save, because no changes were retrieved.
         $mockDI->expects($this->never())
@@ -458,7 +458,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $updatedFooTermArray['scope_note'] = 'Updated scope note';
 
         $mockRex->expects($this->once())
-            ->method('getByIdIfModifiedSince')
+            ->method('getTermByIdIfModifiedSince')
             ->with(
                 $this->equalTo(self::FOO_FOLKSAURUS_ID),
                 $this->equalTo($yesterday)
@@ -489,7 +489,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(false));
 
         $mockRex->expects($this->once())
-            ->method('getOrCreate')
+            ->method('getOrCreateTerm')
             ->with('Foo')
             ->will($this->returnValue($this->_getFooTermArray()));
 
@@ -517,7 +517,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(false));
 
         $mockRex->expects($this->once())
-            ->method('getOrCreate')
+            ->method('getOrCreateTerm')
             ->with('Foo')
             ->will($this->returnValue(false));
 

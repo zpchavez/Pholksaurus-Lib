@@ -25,7 +25,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testGetById()
+    public function testGetTermById()
     {
         $mockCurl = $this->getMock('Curl');
         // URL is set.
@@ -73,11 +73,11 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(200));
 
         $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
-        $termArray = $rex->getById('1');
+        $termArray = $rex->getTermById('1');
         $this->assertEquals($this->_getFooTermArray(), $termArray);
     }
 
-    public function testGetByIdIfModifiedSince()
+    public function testGetTermByIdIfModifiedSince()
     {
         $mockCurl = $this->getMock('Curl');
         // URL is set.
@@ -128,7 +128,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         // False returned if response is NULL because term not modified since.
 
         $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
-        $returnValue = $rex->getByIdIfModifiedSince('1', time());
+        $returnValue = $rex->getTermByIdIfModifiedSince('1', time());
         $this->assertFalse($returnValue);
         $this->assertEquals(304, $rex->getLatestResponseCode());
 
@@ -140,7 +140,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(404));
 
-        $returnValue = $rex->getByIdIfModifiedSince('1', time());
+        $returnValue = $rex->getTermByIdIfModifiedSince('1', time());
         $this->assertFalse($returnValue);
         $this->assertEquals(404, $rex->getLatestResponseCode());
 
@@ -157,12 +157,12 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(200));
 
         $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
-        $termArray = $rex->getByIdIfModifiedSince('1', time());
+        $termArray = $rex->getTermByIdIfModifiedSince('1', time());
         $this->assertEquals($this->_getFooTermArray(), $termArray);
         $this->assertEquals(200, $rex->getLatestResponseCode());
     }
 
-    public function testGetByName()
+    public function testGetTermByName()
     {
         $mockCurl = $this->getMock('Curl');
         // URL is set.
@@ -210,11 +210,11 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(200));
 
         $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
-        $termArray = $rex->getByName('Foo');
+        $termArray = $rex->getTermByName('Foo');
         $this->assertEquals($this->_getFooTermArray(), $termArray);
     }
 
-    public function testGetByNameIfModifiedSince()
+    public function testGetTermByNameIfModifiedSince()
     {
         $mockCurl = $this->getMock('Curl');
         // URL is set.
@@ -265,7 +265,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         // False returned if response is NULL because term not modified since.
 
         $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
-        $returnValue = $rex->getByNameIfModifiedSince('Foo', time());
+        $returnValue = $rex->getTermByNameIfModifiedSince('Foo', time());
         $this->assertFalse($returnValue);
 
         // False also returned if response is NULL because the term was not found at all.
@@ -276,7 +276,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(404));
 
-        $returnValue = $rex->getByNameIfModifiedSince('Foo', time());
+        $returnValue = $rex->getTermByNameIfModifiedSince('Foo', time());
         $this->assertFalse($returnValue);
         $this->assertEquals(404, $rex->getLatestResponseCode());
 
@@ -293,12 +293,12 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(200));
 
         $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
-        $termArray = $rex->getByNameIfModifiedSince('Foo', time());
+        $termArray = $rex->getTermByNameIfModifiedSince('Foo', time());
         $this->assertEquals($this->_getFooTermArray(), $termArray);
         $this->assertEquals(200, $rex->getLatestResponseCode());
     }
 
-    public function testCreate()
+    public function testCreateTerm()
     {
         $mockCurl = $this->getMock('Curl');
         // URL is set.
@@ -355,14 +355,14 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(201));
 
         $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
-        $id = $rex->create('Foo');
+        $id = $rex->createTerm('Foo');
         $this->assertEquals(1, $id);
         $this->assertEquals(201, $rex->getLatestResponseCode());
     }
 
-    public function testGetOrCreate()
+    public function testGetOrCreateTerm()
     {
-        // Acts just like getByName if the name returns a result.
+        // Acts just like getTermByName if the name returns a result.
         $mockCurl = $this->getMock('Curl');
         // URL is set.
         $mockCurl->expects($this->at(0))
@@ -409,7 +409,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(200));
 
         $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
-        $termArray = $rex->getOrCreate('Foo');
+        $termArray = $rex->getOrCreateTerm('Foo');
         $this->assertEquals($this->_getFooTermArray(), $termArray);
 
         // But if no term is found, it creates it.
@@ -524,7 +524,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(200));
 
-        $termArray = $rex->getOrCreate('Foo');
+        $termArray = $rex->getOrCreateTerm('Foo');
         $this->assertEquals($this->_getFooTermArray(), $termArray);
     }
 
