@@ -6,7 +6,7 @@ namespace Folksaurus;
  */
 class TermSummaryTest extends \PHPUnit_Framework_TestCase
 {
-    public function testGetCompleteTerm()
+    public function testGetCompleteTermReturnsResultsOfGetTermByFolksaurusIdCallOnApiObject()
     {
         $mockApi = $this->getMock('Folksaurus\Api', array(), array(), '', false);
 

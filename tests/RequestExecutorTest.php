@@ -25,7 +25,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testGetTermById()
+    public function testGetTermByIdMakesExpectedCallsOnCurlObject()
     {
         $mockCurl = $this->getMock('Curl');
         // URL is set.
@@ -77,7 +77,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->_getFooTermArray(), $termArray);
     }
 
-    public function testGetTermByIdIfModifiedSince()
+    public function testGetTermByIdIfModifiedSinceMakesExpectedCallsOnCurlObject()
     {
         $mockCurl = $this->getMock('Curl');
         // URL is set.
@@ -162,7 +162,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(200, $rex->getLatestResponseCode());
     }
 
-    public function testGetTermByName()
+    public function testGetTermByNameMakesExpectedCallsOnCurlObject()
     {
         $mockCurl = $this->getMock('Curl');
         // URL is set.
@@ -214,7 +214,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->_getFooTermArray(), $termArray);
     }
 
-    public function testGetTermByNameIfModifiedSince()
+    public function testGetTermByNameIfModifiedSinceMakesExpectedCallsOnCurlObject()
     {
         $mockCurl = $this->getMock('Curl');
         // URL is set.
@@ -298,7 +298,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(200, $rex->getLatestResponseCode());
     }
 
-    public function testCreateTerm()
+    public function testCreateTermMakesExpectedCallsOnCurlObject()
     {
         $mockCurl = $this->getMock('Curl');
         // URL is set.
@@ -360,7 +360,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(201, $rex->getLatestResponseCode());
     }
 
-    public function testGetOrCreateTerm()
+    public function testGetOrCreateTermMakesExpectedCallsOnCurlObject()
     {
         // Acts just like getTermByName if the name returns a result.
         $mockCurl = $this->getMock('Curl');
@@ -528,7 +528,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->_getFooTermArray(), $termArray);
     }
 
-    public function testGetByTermList()
+    public function testGetTermListMakesExpectedCallsOnCurlObject()
     {
         $mockCurl = $this->getMock('Curl');
         // URL is set.

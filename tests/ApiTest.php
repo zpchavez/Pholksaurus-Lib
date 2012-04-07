@@ -30,7 +30,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testGetTermByAppIdForTermNotFoundInDb()
+    public function testGetTermByAppIdForTermNotFoundInDbMakesNoRequestAndReturnsFalse()
     {
         $mockDI  = $this->getMock('Folksaurus\DataInterface');
         $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
@@ -52,7 +52,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($term);
     }
 
-    public function testGetTermByAppIdForNonExpiredTermInDb()
+    public function testGetTermByAppIdForNonExpiredTermDoesNotMakeARequestOrUpdateTerm()
     {
         $mockDI  = $this->getMock('Folksaurus\DataInterface');
         $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
@@ -85,7 +85,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(self::FOO_APP_ID, $term->getAppId());
     }
 
-    public function testGetTermByAppIdForExpiredTermInDbThatHasBeenModified()
+    public function testGetTermByAppIdForModifiedExpiredTermMakesRequestAndUpdatesTerm()
     {
         $mockDI  = $this->getMock('Folksaurus\DataInterface');
         $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
@@ -127,7 +127,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($term->getLastRetrievedTime() > $yesterday);
     }
 
-    public function testGetTermByAppIdForExpiredTermInDbThatHasNotBeenModified()
+    public function testGetTermByAppIdForUnmodifiedExpiredTermMakesRequestAndUpdatesModTime()
     {
         $mockDI  = $this->getMock('Folksaurus\DataInterface');
         $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
@@ -171,7 +171,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($term->getLastRetrievedTime() > $yesterday);
     }
 
-    public function testGetTermByAppIdForExpiredTermInDbThatIsHasNoFolksaurusId()
+    public function testGetTermByAppIdForExpiredTermWithNoFolksaurusIdGetsByNameAndSavesTerm()
     {
         $mockDI  = $this->getMock('Folksaurus\DataInterface');
         $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
@@ -213,7 +213,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($term->getLastRetrievedTime() > $yesterday);
     }
 
-    public function testGetTermByAppIdForExpiredTermInDbThatIsNotFoundInFolksaurus()
+    public function testGetTermByAppIdForExpiredTermNotInFolksaurusMakesCreateRequestAndSavesTerm()
     {
         // If term does not exist in Folksaurus, Api makes a request to create it.
 
@@ -265,7 +265,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($term->getLastRetrievedTime() > $yesterday);
     }
 
-    public function testGetTermByFolksaurusIdForTermNotInDb()
+    public function testGetTermByFolksaurusIdForTermNotInDbMakesRequestAndSavesNewTermIfFound()
     {
         $mockDI  = $this->getMock('Folksaurus\DataInterface');
         $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
@@ -297,7 +297,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($term->getLastRetrievedTime() > 0);
     }
 
-    public function testGetTermByFolksaurusIdForNonExpiredTermInDb()
+    public function testGetTermByFolksaurusIdForNonExpiredTermMakesNoRequestAndDoesNotUpdateTerm()
     {
         $mockDI  = $this->getMock('Folksaurus\DataInterface');
         $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
@@ -327,7 +327,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(self::FOO_APP_ID, $term->getAppId());
     }
 
-    public function testGetTermByFolksaurusIdForExpiredTermInDbThatHasBeenModified()
+    public function testGetTermByFolksaurusIdForExpiredModifiedTermMakesRequestAndUpdatesTerm()
     {
         $mockDI  = $this->getMock('Folksaurus\DataInterface');
         $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
@@ -366,7 +366,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($term->getLastRetrievedTime() > 0);
     }
 
-    public function testGetTermByFolksaurusIdForExpiredTermInDbThatHasNotBeenModified()
+    public function testGetTermByFolksaurusIdForExpiredUnmodifiedTermMakesRequestButDoesNotUpdate()
     {
         $mockDI  = $this->getMock('Folksaurus\DataInterface');
         $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
