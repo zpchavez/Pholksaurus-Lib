@@ -38,7 +38,9 @@ interface DataInterface
      *
      * The term may be new, or it may be an update of a term
      * that already exists in your database.  The app_id
-     * should be set if the term already exists.
+     * will be set if the term already exists.
+     *
+     * See the README for more details on implementing this method.
      *
      * @param Term $term
      */
