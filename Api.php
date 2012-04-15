@@ -151,6 +151,16 @@ class Api
     }
 
     /**
+     * Get the RequestExecutor object used by this instance.
+     *
+     * @return RequestExecutor
+     */
+    public function getRequestExecutor()
+    {
+        return $this->_rex;
+    }
+
+    /**
      * Get the latest data for $term and return an updated Term object.
      *
      * If term is current, return it back.
