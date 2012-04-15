@@ -154,25 +154,6 @@ class RequestExecutor
     }
 
     /**
-     * Get a term info array by the term name.
-     *
-     * @param string $name
-     * @param int $ifModifiedSince   A timestamp.
-     * @return array|bool            False if term not found, or if $ifModifiedSince
-     *                               is specified and the term has not changed since.
-     */
-    public function _getTermByName($name, $ifModifiedSince = null)
-    {
-        $uri = sprintf(
-            self::RES_TERM_BY_NAME,
-            $this->_url,
-            rawurlencode($name)
-        );
-        $response = $this->_executeGetRequest($uri, $ifModifiedSince);
-        return $response ?: false;
-    }
-
-    /**
      * Get a term info array by the term name, or false if not found.
      *
      * @param string $name
@@ -180,22 +161,13 @@ class RequestExecutor
      */
     public function getTermByName($name)
     {
-        return $this->_getTermByName($name);
-    }
-
-    /**
-     * Get a term info array only if the term has been modified since $ifModifiedSince.
-     *
-     * @param string $name
-     * @param int $ifModifiedSince  A timestamp.
-     * @return array|bool           The term if found and modified since.
-     *                              False if not found or not modified since.
-     *                              To determine which, call getLastResponseCode.
-     *                              304 means the term was found but unchanged.
-     */
-    public function getTermByNameIfModifiedSince($name, $ifModifiedSince)
-    {
-        return $this->_getTermByName($name, $ifModifiedSince);
+        $uri = sprintf(
+            self::RES_TERM_BY_NAME,
+            $this->_url,
+            rawurlencode($name)
+        );
+        $response = $this->_executeGetRequest($uri);
+        return $response ?: false;
     }
 
     /**

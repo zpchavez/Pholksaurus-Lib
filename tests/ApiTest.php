@@ -410,7 +410,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 
         // Won't send a request to Folksaurus, because term was retrieved recently.
         $mockRex->expects($this->never())
-            ->method('getTermByNameIfModifiedSince');
+            ->method('getTermByName');
         $mockRex->expects($this->never())
             ->method('getTermByIdIfModifiedSince');
         $mockRex->expects($this->never())
