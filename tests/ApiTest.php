@@ -127,6 +127,49 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($term->getLastRetrievedTime() > $yesterday);
     }
 
+    public function testGettingTermThatWasDeletedRemotelyCallsDeleteTermAndReturnsFalse()
+    {
+        $mockDI  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+
+        $yesterday = time() - (60 * 60 * 24);
+        $fooTermArray = $this->_getFooTermArray();
+        $fooTermArray['last_retrieved'] = $yesterday;
+
+        $mockDI->expects($this->once())
+            ->method('getTermByAppId')
+            ->with($this->equalTo(self::FOO_APP_ID))
+            ->will($this->returnValue($fooTermArray));
+
+        $updatedFooTermArray = $fooTermArray;
+        $updatedFooTermArray['scope_note'] = 'Updated scope note';
+
+        // Term is expired, so send request for latest info.
+        $mockRex->expects($this->once())
+            ->method('getTermByIdIfModifiedSince')
+            ->with(
+                $this->equalTo(self::FOO_FOLKSAURUS_ID),
+                $this->equalTo($yesterday)
+            )->will($this->returnValue(false));
+
+        $mockRex->expects($this->once())
+            ->method('getLatestResponseCode')
+            ->will($this->returnValue(StatusCodes::GONE));
+
+        $mockDI->expects($this->once())
+            ->method('deleteTerm')
+            ->with($this->equalTo($fooTermArray['app_id']));
+
+        $mockDI->expects($this->never())
+            ->method('saveTerm');
+
+        $api = new Api($mockDI, $mockRex, CONFIG_PATH);
+
+        $term = $api->getTermByAppId(self::FOO_APP_ID);
+
+        $this->assertFalse($term);
+    }
+
     public function testGetTermByAppIdForUnmodifiedExpiredTermMakesRequestAndUpdatesModTime()
     {
         $mockDI  = $this->getMock('Folksaurus\DataInterface');
@@ -531,6 +574,77 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($term instanceof Term);
         $this->assertEquals('Foo', $term->getName());
         $this->assertEquals('', $term->getId());
+    }
+
+    public function testGetOrCreateOnRemotelyDeletedTermInDbReturnsFalseAndCallsDeleteTerm()
+    {
+        $mockDI  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+
+        $fooTermArray = $this->_getFooTermArray();
+
+        $mockDI->expects($this->once())
+            ->method('getTermByName')
+            ->with($this->equalTo('Foo'))
+            ->will($this->returnValue($fooTermArray));
+
+        $mockRex->expects($this->once())
+            ->method('getTermByIdIfModifiedSince')
+            ->with(
+                $this->equalTo(self::FOO_FOLKSAURUS_ID),
+                $this->equalTo($fooTermArray['last_retrieved'])
+            )->will($this->returnValue(false));
+
+        $mockRex->expects($this->once())
+            ->method('getLatestResponseCode')
+            ->will($this->returnValue(StatusCodes::GONE));
+
+        $mockDI->expects($this->once())
+            ->method('deleteTerm')
+            ->with($this->equalTo($fooTermArray['app_id']));
+
+        $mockDI->expects($this->never())
+            ->method('saveTerm');
+
+        $api = new Api($mockDI, $mockRex, CONFIG_PATH);
+        $term = $api->getOrCreateTerm('Foo');
+
+        $this->assertFalse($term);
+    }
+
+    public function testGetOrCreateOnRemotelyDeletedTermNotinDbReturnsFalseAndDoesNotSaveTerm()
+    {
+        $mockDI  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+
+        $fooTermArray = $this->_getFooTermArray();
+
+        $mockDI->expects($this->once())
+            ->method('getTermByName')
+            ->with($this->equalTo('Foo'))
+            ->will($this->returnValue(false));
+
+        $mockRex->expects($this->once())
+            ->method('getOrCreateTerm')
+            ->with($this->equalTo('Foo'))
+            ->will($this->returnValue(false));
+
+        // The FORBIDDEN code is returned when trying to PUT a term that has been deleted.
+        $mockRex->expects($this->once())
+            ->method('getLatestResponseCode')
+            ->will($this->returnValue(StatusCodes::FORBIDDEN));
+
+        $mockDI->expects($this->never())
+            ->method('saveTerm');
+
+        // Delete not called because there is no local term to delete.
+        $mockDI->expects($this->never())
+            ->method('deleteTerm');
+
+        $api = new Api($mockDI, $mockRex, CONFIG_PATH);
+        $term = $api->getOrCreateTerm('Foo');
+
+        $this->assertFalse($term);
     }
 
 }

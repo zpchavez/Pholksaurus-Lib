@@ -130,9 +130,9 @@ Implement DataInterface
 -----------------------
 
 Next you will need to write an implementation of DataInterface.  The get
-methods are very straightforward, but special consideration must be given to
-the saveTerm method.  When implementing this method, make sure to handle the
-following cases:
+methods and deleteTerm method should be very straightforward, but special
+consideration must be given to the saveTerm method.  When implementing this
+method, make sure to handle the following cases:
 
    * In addition to saving the term itself, you will also need to save the
      relationships for the term.  Some of these relationships will be to

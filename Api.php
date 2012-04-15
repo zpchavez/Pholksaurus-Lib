@@ -132,16 +132,22 @@ class Api
             $term = new Term($termArray, $this);
             $this->_dataInterface->saveTerm($term);
             return $term;
+        } else if ($this->_rex->getLatestResponseCode() == StatusCodes::FORBIDDEN ||
+                   $this->_rex->getLatestResponseCode() == StatusCodes::GONE) {
+            return false;
+        } else {
+            // If term not retrieved or created for some other reason, create a
+            // placeholder term locally.
+            $term = new Term(
+                array(
+                    'name'           => $name,
+                    'last_retrieved' => 0
+                ),
+                $this
+            );
+            $this->_dataInterface->saveTerm($term);
+            return $term;
         }
-        $term = new Term(
-            array(
-                'name'           => $name,
-                'last_retrieved' => 0
-            ),
-            $this
-        );
-        $this->_dataInterface->saveTerm($term);
-        return $term;
     }
 
     /**
@@ -205,6 +211,9 @@ class Api
                     $this->_dataInterface->saveTerm($newTerm);
                     return $newTerm;
                 }
+            } else if ($responseCode == StatusCodes::GONE) {
+                $this->_dataInterface->deleteTerm($term->getAppId());
+                return false;
             }
         }
         return $term;

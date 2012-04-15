@@ -45,4 +45,12 @@ interface DataInterface
      * @param Term $term
      */
     public function saveTerm(Term $term);
+
+    /**
+     * Flag a term as deleted.
+     *
+     * @param mixed $appId  The ID assigned to the term by your application.
+     */
+    public function deleteTerm($appId);
+
 }
