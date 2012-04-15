@@ -214,15 +214,16 @@ class RequestExecutor
     }
 
     /**
-     * Create a new term.
+     * Attempt to get a term by name.  If it does not exist, create it.
      *
      * @param string $name
-     * @return string       If successfull, the ID of the newly
-     *                      created term.  If the term already exists,
-     *                      the ID of that term.  Otherwise false.
+     * @return array        If found, a term info array.  Otherwise, false.
      */
-    public function createTerm($name)
+    public function getOrCreateTerm($name)
     {
+        // Since trying to PUT an existing term returns a 409 response with the
+        // JSON of the conflicting term, we can save a request by just attempting
+        // a PUT and returning the output.
         $uri = sprintf(
             self::RES_TERM_BY_NAME,
             $this->_url,
@@ -232,28 +233,9 @@ class RequestExecutor
         $this->_curlObj->customrequest = 'PUT';
         $this->_addHeaders(array('Content-Length: 0'));
         $this->_curlObj->postfields = '';
-        $id = $this->_curlObj->exec();
+        $response = $this->_curlObj->fetch_json(true);
         $this->_latestResponseCode = $this->_curlObj->info('HTTP_CODE');
-        return $id;
-    }
-
-    /**
-     * Attempt to get a term by name.  If it does not exist, create it.
-     *
-     * @param string $name
-     * @return array        If found, a term info array.  Otherwise, false.
-     */
-    public function getOrCreateTerm($name)
-    {
-        $termArray = $this->getTermByName($name);
-        if ($termArray) {
-            return $termArray;
-        }
-        $id = $this->createTerm($name);
-        if ($id) {
-            return $this->getTermById($id);
-        }
-        return false;
+        return $response;
     }
 
 }

@@ -298,68 +298,6 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(200, $rex->getLatestResponseCode());
     }
 
-    public function testCreateTermMakesExpectedCallsOnCurlObject()
-    {
-        $mockCurl = $this->getMock('Curl');
-        // URL is set.
-        $mockCurl->expects($this->at(0))
-            ->method('__set')
-            ->with(
-                $this->equalTo('url'),
-                $this->equalTo(
-                    sprintf(
-                        RequestExecutor::RES_TERM_BY_NAME,
-                        API_URL,
-                        'Foo'
-                    )
-                )
-            );
-
-        // Method set to PUT.
-        $mockCurl->expects($this->at(1))
-            ->method('__set')
-            ->with(
-                $this->equalTo('customrequest'),
-                $this->equalTo('PUT')
-            );
-
-        // Content-Length and authorization headers set.
-        $headers = array(
-            'Content-Length: 0',
-            sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
-        );
-        $mockCurl->expects($this->at(2))
-            ->method('__set')
-            ->with(
-                $this->equalTo('httpheader'),
-                $this->equalTo($headers)
-            );
-
-        // Post fields are blank, since all necessary info is in the URL.
-        $mockCurl->expects($this->at(3))
-            ->method('__set')
-            ->with(
-                $this->equalTo('postfields'),
-                $this->equalTo('')
-            );
-
-        // Results fetched and ID returned.
-        $mockCurl->expects($this->at(4))
-            ->method('exec')
-            ->will($this->returnValue(1));
-
-        // Response code retrieved.
-        $mockCurl->expects($this->at(5))
-            ->method('info')
-            ->with($this->equalTo('HTTP_CODE'))
-            ->will($this->returnValue(201));
-
-        $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
-        $id = $rex->createTerm('Foo');
-        $this->assertEquals(1, $id);
-        $this->assertEquals(201, $rex->getLatestResponseCode());
-    }
-
     public function testGetOrCreateTermMakesExpectedCallsOnCurlObject()
     {
         // Acts just like getTermByName if the name returns a result.
@@ -382,11 +320,12 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             ->method('__set')
             ->with(
                 $this->equalTo('customrequest'),
-                $this->equalTo('GET')
+                $this->equalTo('PUT')
             );
 
-        // Authorization header set.
+        // Authorization and Content-Length headers set.
         $headers = array(
+            'Content-Length: 0',
             sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
         );
         $mockCurl->expects($this->at(2))
@@ -396,71 +335,8 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
                 $this->equalTo($headers)
             );
 
-        // JSON fetched.
-        $mockCurl->expects($this->at(3))
-            ->method('fetch_json')
-            ->with($this->equalTo(true))
-            ->will($this->returnValue($this->_getFooTermArray()));
-
-        // Response code retrieved.
-        $mockCurl->expects($this->at(4))
-            ->method('info')
-            ->with($this->equalTo('HTTP_CODE'))
-            ->will($this->returnValue(200));
-
-        $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
-        $termArray = $rex->getOrCreateTerm('Foo');
-        $this->assertEquals($this->_getFooTermArray(), $termArray);
-
-        // But if no term is found, it creates it.
-        $mockCurl->expects($this->at(3))
-            ->method('fetch_json')
-            ->with($this->equalTo(true))
-            ->will($this->returnValue(NULL));
-
-        // Response code retrieved.
-        $mockCurl->expects($this->at(4))
-            ->method('info')
-            ->with($this->equalTo('HTTP_CODE'))
-            ->will($this->returnValue(404));
-
-
-        // URL is set.
-        $mockCurl->expects($this->at(5))
-            ->method('__set')
-            ->with(
-                $this->equalTo('url'),
-                $this->equalTo(
-                    sprintf(
-                        RequestExecutor::RES_TERM_BY_NAME,
-                        API_URL,
-                        'Foo'
-                    )
-                )
-            );
-
-        // Method set to PUT.
-        $mockCurl->expects($this->at(6))
-            ->method('__set')
-            ->with(
-                $this->equalTo('customrequest'),
-                $this->equalTo('PUT')
-            );
-
-        // Content-Length and authorization headers set.
-        $headers = array(
-            'Content-Length: 0',
-            sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
-        );
-        $mockCurl->expects($this->at(7))
-            ->method('__set')
-            ->with(
-                $this->equalTo('httpheader'),
-                $this->equalTo($headers)
-            );
-
         // Post fields are blank, since all necessary info is in the URL.
-        $mockCurl->expects($this->at(8))
+        $mockCurl->expects($this->at(3))
             ->method('__set')
             ->with(
                 $this->equalTo('postfields'),
@@ -468,63 +344,20 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             );
 
         // Results fetched and ID returned.
-        $mockCurl->expects($this->at(9))
-            ->method('exec')
-            ->will($this->returnValue(1));
+        $mockCurl->expects($this->at(4))
+            ->method('fetch_json')
+            ->will($this->returnValue($this->_getFooTermArray()));
 
         // Response code retrieved.
-        $mockCurl->expects($this->at(10))
+        $mockCurl->expects($this->at(5))
             ->method('info')
             ->with($this->equalTo('HTTP_CODE'))
             ->will($this->returnValue(201));
 
-        // After the term is created it is fetched.
-
-        // URL changed.
-        $mockCurl->expects($this->at(11))
-            ->method('__set')
-            ->with(
-                $this->equalTo('url'),
-                $this->equalTo(
-                    sprintf(
-                        RequestExecutor::RES_TERM_BY_ID,
-                        API_URL,
-                        '1'
-                    )
-                )
-            );
-
-        $mockCurl->expects($this->at(12))
-            ->method('__set')
-            ->with(
-                $this->equalTo('customrequest'),
-                $this->equalTo('GET')
-            );
-
-        // Authorization header set.
-        $headers = array(
-            sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
-        );
-        $mockCurl->expects($this->at(13))
-            ->method('__set')
-            ->with(
-                $this->equalTo('httpheader'),
-                $this->equalTo($headers)
-            );
-
-        // JSON fetched.
-        $mockCurl->expects($this->at(14))
-            ->method('fetch_json')
-            ->with($this->equalTo(true))
-            ->will($this->returnValue($this->_getFooTermArray()));
-
-        // Response code retrieved.
-        $mockCurl->expects($this->at(15))
-            ->method('info')
-            ->with($this->equalTo('HTTP_CODE'))
-            ->will($this->returnValue(200));
+        $rex = new RequestExecutor(API_KEY, API_URL, $mockCurl);
 
         $termArray = $rex->getOrCreateTerm('Foo');
+
         $this->assertEquals($this->_getFooTermArray(), $termArray);
     }
 

@@ -179,41 +179,34 @@ class Api
                     $term->getId(),
                     $lastRetrievedTime
                 );
-            } else { // Otherwise search by name.
-                $updatedTermArray = $this->_rex->getTermByName(
-                    $term->getName(),
-                    $lastRetrievedTime
-                );
             }
-            $responseCode = $this->_rex->getLatestResponseCode();
+
+            // If that didn't work, or if Folksaurus ID not set, get or create by name.
+            if (!$term->getId() || !$updatedTermArray) {
+                $updatedTermArray = $this->_rex->getOrCreateTerm($term->getName());
+            }
+
+            // If found, update term and save.
             if ($updatedTermArray) {
                 $updatedTermArray['last_retrieved'] = time();
                 $updatedTermArray['app_id'] = $term->getAppId();
                 $updatedTerm = new Term($updatedTermArray, $this);
                 $this->_dataInterface->saveTerm($updatedTerm);
                 return $updatedTerm;
-            } else if ($responseCode == StatusCodes::NOT_MODIFIED) {
-                $term->updateLastRetrievedTime();
-                $this->_dataInterface->saveTerm($term);
-            } else if ($responseCode == StatusCodes::NOT_FOUND) {
-                $id = $this->_rex->createTerm($term->getName());
-                $responseCode = $this->_rex->getLatestResponseCode();
-                if ($id && $responseCode = StatusCodes::CREATED) {
-                    $newTerm = new Term(
-                        array(
-                            'id'             => $id,
-                            'app_id'         => $term->getAppId(),
-                            'name'           => $term->getName(),
-                            'last_retrieved' => time()
-                        ),
-                        $this
-                    );
-                    $this->_dataInterface->saveTerm($newTerm);
-                    return $newTerm;
-                }
-            } else if ($responseCode == StatusCodes::GONE) {
-                $this->_dataInterface->deleteTerm($term->getAppId());
-                return false;
+            }
+
+            // If not found, use response code to determine action to take.
+            switch ($this->_rex->getLatestResponseCode()) {
+                case StatusCodes::NOT_MODIFIED:
+                    $term->updateLastRetrievedTime();
+                    $this->_dataInterface->saveTerm($term);
+                    break;
+                case StatusCodes::GONE:
+                    // Intentional fall-through.
+                case StatusCodes::FORBIDDEN:
+                    $this->_dataInterface->deleteTerm($term->getAppId());
+                    return false;
+                    break;
             }
         }
         return $term;

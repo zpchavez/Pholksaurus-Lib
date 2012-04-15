@@ -235,7 +235,7 @@ class ApiTest extends \PHPUnit_Framework_TestCase
 
         // Term is expired, so send request for latest info.
         $mockRex->expects($this->once())
-            ->method('getTermByName')
+            ->method('getOrCreateTerm')
             ->with($this->equalTo('Foo'))
             ->will($this->returnValue($updatedFooTermArray));
 
@@ -253,58 +253,6 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(self::FOO_FOLKSAURUS_ID, $term->getId());
         $this->assertEquals(self::FOO_APP_ID, $term->getAppId());
         $this->assertEquals('Updated scope note', $term->getScopeNote());
-        $this->assertTrue($term->getLastRetrievedTime() > $yesterday);
-    }
-
-    public function testGetTermByAppIdForExpiredTermNotInFolksaurusMakesCreateRequestAndSavesTerm()
-    {
-        // If term does not exist in Folksaurus, Api makes a request to create it.
-
-        $mockDI  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
-
-        $yesterday = time() - (60 * 60 * 24);
-        $fooTermArray = $this->_getFooTermArray();
-        $fooTermArray['last_retrieved'] = $yesterday;
-        $fooTermArray['id'] = '0';
-
-        $mockDI->expects($this->once())
-            ->method('getTermByAppId')
-            ->with($this->equalTo(self::FOO_APP_ID))
-            ->will($this->returnValue($fooTermArray));
-
-        // Term is expired, so send request for latest info.
-        $mockRex->expects($this->at(0))
-            ->method('getTermByName')
-            ->with($this->equalTo('Foo'))
-            ->will($this->returnValue(false));
-
-        $mockRex->expects($this->at(1))
-            ->method('getLatestResponseCode')
-            ->will($this->returnValue(StatusCodes::NOT_FOUND));
-
-        $mockRex->expects($this->at(2))
-            ->method('createTerm')
-            ->with($this->equalTo('Foo'))
-            ->will($this->returnValue(self::FOO_FOLKSAURUS_ID));
-
-        $mockRex->expects($this->at(3))
-            ->method('getLatestResponseCode')
-            ->will($this->returnValue(StatusCodes::CREATED));
-
-        // New term saved.
-        $mockDI->expects($this->once())
-            ->method('saveTerm');
-
-        $api = new Api($mockDI, $mockRex, CONFIG_PATH);
-
-        $term = $api->getTermByAppId(self::FOO_APP_ID);
-
-        $this->assertTrue($term instanceof Term);
-        $this->assertEquals('Foo', $term->getName());
-        $this->assertEquals(self::FOO_FOLKSAURUS_ID, $term->getId());
-        $this->assertEquals(self::FOO_APP_ID, $term->getAppId());
-        $this->assertEquals('', $term->getScopeNote());
         $this->assertTrue($term->getLastRetrievedTime() > $yesterday);
     }
 
