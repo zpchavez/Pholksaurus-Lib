@@ -78,9 +78,6 @@ The library is made up of the following components.
     > A slightly modified version of a library that provides an Object-Oriented
     > interface to PHP's cURL functions.
 
-* responseCodeMessages.php
-    > Defines an array of HTTP status codes and their associated messages.
-
 * RequestExecutor.php
     > Defines a class containing methods for making requests to Folksaurus.
     > This class is used by the Api class and you may not have a need to use it
@@ -192,5 +189,4 @@ to know the result of a request you can do the following.
 
 ```php
 $statusCode = $api->getRequestExecutor()->getLatestResponseCode();
-$statusMsg  = $api->getRequestExecutor()->getLatestResponseMessage();
 ```

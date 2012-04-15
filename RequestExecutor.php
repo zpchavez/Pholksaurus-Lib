@@ -1,8 +1,6 @@
 <?php
 namespace Folksaurus;
 
-require_once 'responseCodeMessages.php';
-
 /**
  * Class for making requests to and receiving responses from Folksaurus.
  */
@@ -69,19 +67,6 @@ class RequestExecutor
     public function getLatestResponseCode()
     {
         return $this->_latestResponseCode;
-    }
-
-    /**
-     * Get a short description of the latest response code.
-     *
-     * @return string
-     */
-    public function getLatestResponseMessage()
-    {
-        if (isset($responseCodeMessages[$this->_latestResponseCode])) {
-            return $responseCodeMessages[$this->_latestResponseCode];
-        }
-        return false;
     }
 
     /**
