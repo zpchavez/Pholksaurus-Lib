@@ -29,14 +29,14 @@ class Api
      * Constructor.
      *
      * @param DataInterface $dataInterface  An implementation of DataInterface.
+     * @param string $configFile         The relative path to the config file to use.
      * @param RequestExecutor $rex       If not provided, an instance will be created
      *                                   using api_key and api_url from the config file.
-     * @param string $configFile         The relative path to the config file to use.
      * @throws Exception if config file could not be found or read or is missing
      *                   required values.
      */
-    public function __construct(DataInterface $dataInterface, RequestExecutor $rex = null,
-                                $configFile = 'config.ini')
+    public function __construct(DataInterface $dataInterface, $configFile = 'config.ini',
+                                RequestExecutor $rex = null)
     {
         $config = parse_ini_file($configFile);
         if (!$config) {
