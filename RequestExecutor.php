@@ -8,8 +8,8 @@ class RequestExecutor
 {
     // Resource URL patterns.
     // In each pattern, the first %s will be replaced with the value of $this->_url.
-    const RES_TERM_BY_ID   = '%s/api/term-by-id/%s/';
-    const RES_TERM_BY_NAME = '%s/api/term-by-name/%s/';
+    const RES_TERM_BY_ID   = '%s/term-by-id/%s/';
+    const RES_TERM_BY_NAME = '%s/term-by-name/%s/';
 
     const AUTHORIZATION_HEADER = 'X-Folksaurus-Authorization: %s'; // %s is the API key
 
