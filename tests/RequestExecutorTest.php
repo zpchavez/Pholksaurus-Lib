@@ -25,6 +25,11 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    protected function _getAuthenticationHeader()
+    {
+        return 'Authorization: Basic ' . base64_encode(':' . API_KEY);
+    }
+
     public function testGetTermByIdMakesExpectedCallsOnCurlObject()
     {
         $mockCurl = $this->getMock('Curl');
@@ -50,9 +55,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             );
 
         // Authorization header set.
-        $headers = array(
-            sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
-        );
+        $headers = array($this->_getAuthenticationHeader());
         $mockCurl->expects($this->at(2))
             ->method('__set')
             ->with(
@@ -103,8 +106,8 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
 
         // Authorization header and if-modified-since header set.
         $headers = array(
-        'If-Modified-Since: ' . gmdate('D, d M Y H:i:s \G\M\T', time()),
-            sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
+            'If-Modified-Since: ' . gmdate('D, d M Y H:i:s \G\M\T', time()),
+            $this->_getAuthenticationHeader()
         );
         $mockCurl->expects($this->at(2))
             ->method('__set')
@@ -187,9 +190,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
             );
 
         // Authorization header set.
-        $headers = array(
-            sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
-        );
+        $headers = array($this->_getAuthenticationHeader());
         $mockCurl->expects($this->at(2))
             ->method('__set')
             ->with(
@@ -242,7 +243,7 @@ class RequestExecutorTest extends \PHPUnit_Framework_TestCase
         // Authorization and Content-Length headers set.
         $headers = array(
             'Content-Length: 0',
-            sprintf(RequestExecutor::AUTHORIZATION_HEADER, API_KEY)
+            $this->_getAuthenticationHeader()
         );
         $mockCurl->expects($this->at(2))
             ->method('__set')

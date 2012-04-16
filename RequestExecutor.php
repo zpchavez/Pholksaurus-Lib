@@ -11,8 +11,6 @@ class RequestExecutor
     const RES_TERM_BY_ID   = '%s/term-by-id/%s/';
     const RES_TERM_BY_NAME = '%s/term-by-name/%s/';
 
-    const AUTHORIZATION_HEADER = 'X-Folksaurus-Authorization: %s'; // %s is the API key
-
     /**
      * The API key assigned to the app for which requests are made.
      *
@@ -77,10 +75,11 @@ class RequestExecutor
      */
     protected function _addHeaders($headers = array())
     {
-        $headers[] = sprintf(
-            self::AUTHORIZATION_HEADER,
-            $this->_apiKey
+        $authorizationHeader = sprintf(
+            'Authorization: Basic %s',
+            base64_encode(':' . $this->_apiKey)
         );
+        $headers[] = $authorizationHeader;
         $this->_curlObj->httpheader = $headers;
     }
 
