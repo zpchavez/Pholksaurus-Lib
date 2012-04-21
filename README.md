@@ -31,7 +31,7 @@ modification, are permitted provided that the following conditions are met:
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
 DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -48,18 +48,13 @@ Files
 The library is made up of the following components.
 
 * Api.php
-    > Defines a class providing high-level, automatic management of the
-    > thesaurus data in your app's database.  It provides methods for
-    > retrieving term data which automatically check the last retrieved value
-    > in your database to determine whether it should check Folksaurus for the
-    > latest version.  The methods will automatically update out-of-date terms,
-    > saving the changes to your database.
+    > The main class containing methods for retrieving data from Folksaurus.
 
 * config-template.ini
-    > A template for the configuration file required by Pholksaurus Lib.  Most
-    > importantly, it contains the API key for your application.  It also
-    > contains the expire_time value, which determines how often your app
-    > will check Folksaurus for updates.
+    > A template for the configuration file.  Most importantly, it contains 
+    > the API key for your application.  It also contains the expire_time 
+    > value, which determines how often your app will check Folksaurus for 
+    > updates.
 
 * DataInterface.php
     > Defines an interface both in the programming language sense and in the
@@ -135,7 +130,8 @@ method, make sure to handle the following cases:
      relationships for the term.  Some of these relationships will be to
      terms that do not yet exist in your database.  In these cases you should
      create a new term with its name and IDs defined and with a
-     last_retrieved value of 0.
+     last_retrieved value of 0.  That way, the full data for the term will
+     be retrieved when needed.
    * Multiple terms with the same name are not allowed in Folksaurus, but it's
      possible for a conflict to arise in your database with terms that aren't
      current.  It might be best not to include a unique index on your term name
@@ -170,18 +166,13 @@ occurs.
    database.
 2. If found, the term's last_retrieved date will be checked against the
    expire_time in your config file to determine whether to check Folksaurus
-   for updates.
+   for updates.  If the expire_time has not been exceeded, skip to step 5.
 3. Assuming the expire_time has passed, a request for the latest term info
    is sent to Folksaurus.  If the term is not found, a create term
-   request will be sent.
-4. In either case the term data is returned and a Folksaurus\Term object
-   representing the up-to-date term is passed to the DataInterface's saveTerm
-   method.
+   request will be sent.  If the term is found but has not been modified 
+   since the expire_time, skip to step 5.
+4. The changes to the term are saved to your database.
 5. The term object is returned.
-
-If the expire_time has not been exceeded, steps 3 and 4 will be skipped.
-Also, if a request is made to Folksaurus and the term has not been modified,
-a 304 NOT MODIFIED status will be returned and step 4 will be skipped.
 
 If a request to Folksaurus fails, the Api methods will still return the
 object representing the term as it existed in your database.  If you need

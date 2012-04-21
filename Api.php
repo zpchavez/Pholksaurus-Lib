@@ -93,7 +93,7 @@ class Api
      * Update database if expire_time has passed since the last_retrieved date.
      *
      * @param int $id
-     * @return Term
+     * @return Term|bool  False if unable to retrieve or if the term was deleted.
      */
     public function getTermByFolksaurusId($id)
     {
