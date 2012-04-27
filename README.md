@@ -47,13 +47,13 @@ Files
 =====
 The library is made up of the following components.
 
-* Api.php
+* TermManager.php
     > The main class containing methods for retrieving data from Folksaurus.
 
 * config-template.ini
-    > A template for the configuration file.  Most importantly, it contains 
-    > the API key for your application.  It also contains the expire_time 
-    > value, which determines how often your app will check Folksaurus for 
+    > A template for the configuration file.  Most importantly, it contains
+    > the API key for your application.  It also contains the expire_time
+    > value, which determines how often your app will check Folksaurus for
     > updates.
 
 * DataInterface.php
@@ -75,7 +75,7 @@ The library is made up of the following components.
 
 * RequestExecutor.php
     > Defines a class containing methods for making requests to Folksaurus.
-    > This class is used by the Api class and you may not have a need to use it
+    > This class is used by the TermManager class and you may not have a need to use it
     > directly.
 
 * StatusCodes.php
@@ -84,7 +84,7 @@ The library is made up of the following components.
 
 * Term.php
     > Defines a class whose instances represent Folksaurus terms.  Usually this
-    > is what the methods in the Api class will return.
+    > is what the methods in the TermManager class will return.
 
 * TermSummary.php
     > Defines a less detailed version of the Term class which only contains the
@@ -108,11 +108,11 @@ Once you have a key you need to create your config file by making a copy of
 config-template.ini.  By default, Pholksaurus Lib will check for a file
 called config.ini in the library's directory, but if you will be using
 the library with multiple applications you can put the file elsewhere
-and specify its path in the constructor to the Api object.
+and specify its path in the constructor to the TermManager object.
 
 There are two other values in the config file.  You probably won't want
 to change api_url.  The other value is expire_time, which specifies
-how often to check Folksaurus for updates.  If you use the Api class
+how often to check Folksaurus for updates.  If you use the TermManager class
 to retrieve a term and the time elapsed since its last_retrieved time
 exceeds this value, then the latest term data will be requested.  Checking
 too often may affect your app's performance and could cause your app to hit
@@ -155,10 +155,11 @@ Usage
 =====
 To load the library, simple include init.php.
 
-The Api class may be the only class you work with directly.  When creating an
-instance of it you pass a DataInterface instance to the constructor.
+The TermManager class may be the only class you work with directly.  When
+creating an instance of it you pass a DataInterface instance to the
+constructor.
 
-When you call any of the get term methods in the Api class
+When you call any of the get term methods in the TermManager class
 (getTermByFolksaurusId, getTermByAppId, and getOrCreateTerm), the following
 occurs.
 
@@ -169,15 +170,15 @@ occurs.
    for updates.  If the expire_time has not been exceeded, skip to step 5.
 3. Assuming the expire_time has passed, a request for the latest term info
    is sent to Folksaurus.  If the term is not found, a create term
-   request will be sent.  If the term is found but has not been modified 
+   request will be sent.  If the term is found but has not been modified
    since the expire_time, skip to step 5.
 4. The changes to the term are saved to your database.
 5. The term object is returned.
 
-If a request to Folksaurus fails, the Api methods will still return the
+If a request to Folksaurus fails, the TermManager methods will still return the
 object representing the term as it existed in your database.  If you need
 to know the result of a request you can do the following.
 
 ```php
-$statusCode = $api->getRequestExecutor()->getLatestResponseCode();
+$statusCode = $termManager->getRequestExecutor()->getLatestResponseCode();
 ```

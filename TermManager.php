@@ -2,9 +2,9 @@
 namespace Folksaurus;
 
 /**
- * The class used to interface with Folksaurus and your own database.
+ * Retrieve terms and keep the database in sync with Folksaurus.
  */
-class Api
+class TermManager
 {
     /**
      * The name-value pairs from the configuration file.

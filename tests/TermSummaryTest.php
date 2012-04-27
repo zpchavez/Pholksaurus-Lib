@@ -6,9 +6,9 @@ namespace Folksaurus;
  */
 class TermSummaryTest extends \PHPUnit_Framework_TestCase
 {
-    public function testGetCompleteTermReturnsResultsOfGetTermByFolksaurusIdCallOnApiObject()
+    public function testGetCompleteTermReturnsResultsOfGetTermByFolksaurusIdCallOnTermManagerObject()
     {
-        $mockApi = $this->getMock('Folksaurus\Api', array(), array(), '', false);
+        $mockTm = $this->getMock('Folksaurus\TermManager', array(), array(), '', false);
 
         $termArray = array(
             'id'         => '1',
@@ -22,12 +22,12 @@ class TermSummaryTest extends \PHPUnit_Framework_TestCase
         );
 
 
-        $mockApi->expects($this->once())
+        $mockTm->expects($this->once())
             ->method('getTermByFolksaurusId')
             ->with($this->equalTo('1'))
             ->will($this->returnValue($termArray));
 
-        $termSummary = new TermSummary(array('id' => '1', 'name' => 'Foo'), $mockApi);
+        $termSummary = new TermSummary(array('id' => '1', 'name' => 'Foo'), $mockTm);
         $returnValue = $termSummary->getCompleteTerm();
         $this->assertEquals($termArray, $returnValue);
     }

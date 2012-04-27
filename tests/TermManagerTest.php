@@ -2,9 +2,9 @@
 namespace Folksaurus;
 
 /**
- * Test class for Api.
+ * Test class for TermManager.
  */
-class ApiTest extends \PHPUnit_Framework_TestCase
+class TermManagerTest extends \PHPUnit_Framework_TestCase
 {
     const FOO_FOLKSAURUS_ID = 1;
     const FOO_APP_ID        = 100;
@@ -46,8 +46,8 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $mockRex->expects($this->never())
             ->method('getTermByIdIfModifiedSince');
 
-        $api = new Api($mockDI, CONFIG_PATH, $mockRex);
-        $term = $api->getTermByAppId(StatusCodes::NOT_FOUND);
+        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $term = $termManager->getTermByAppId(StatusCodes::NOT_FOUND);
 
         $this->assertFalse($term);
     }
@@ -76,8 +76,8 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $mockDI->expects($this->never())
             ->method('saveTerm');
 
-        $api = new Api($mockDI, CONFIG_PATH, $mockRex);
-        $term = $api->getTermByAppId(self::FOO_APP_ID);
+        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $term = $termManager->getTermByAppId(self::FOO_APP_ID);
 
         $this->assertTrue($term instanceof Term);
         $this->assertEquals('Foo', $term->getName());
@@ -115,9 +115,9 @@ class ApiTest extends \PHPUnit_Framework_TestCase
             ->method('saveTerm')
             ->with($this->isInstanceOf('Folksaurus\Term'));
 
-        $api = new Api($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
 
-        $term = $api->getTermByAppId(self::FOO_APP_ID);
+        $term = $termManager->getTermByAppId(self::FOO_APP_ID);
 
         $this->assertTrue($term instanceof Term);
         $this->assertEquals('Foo', $term->getName());
@@ -163,9 +163,9 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $mockDI->expects($this->never())
             ->method('saveTerm');
 
-        $api = new Api($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
 
-        $term = $api->getTermByAppId(self::FOO_APP_ID);
+        $term = $termManager->getTermByAppId(self::FOO_APP_ID);
 
         $this->assertFalse($term);
     }
@@ -202,9 +202,9 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $mockDI->expects($this->once())
             ->method('saveTerm');
 
-        $api = new Api($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
 
-        $term = $api->getTermByAppId(self::FOO_APP_ID);
+        $term = $termManager->getTermByAppId(self::FOO_APP_ID);
 
         $this->assertTrue($term instanceof Term);
         $this->assertEquals('Foo', $term->getName());
@@ -244,9 +244,9 @@ class ApiTest extends \PHPUnit_Framework_TestCase
             ->method('saveTerm')
             ->with($this->isInstanceOf('Folksaurus\Term'));
 
-        $api = new Api($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
 
-        $term = $api->getTermByAppId(self::FOO_APP_ID);
+        $term = $termManager->getTermByAppId(self::FOO_APP_ID);
 
         $this->assertTrue($term instanceof Term);
         $this->assertEquals('Foo', $term->getName());
@@ -277,8 +277,8 @@ class ApiTest extends \PHPUnit_Framework_TestCase
             ->method('saveTerm')
             ->with($this->isInstanceOf('Folksaurus\Term'));
 
-        $api = new Api($mockDI, CONFIG_PATH, $mockRex);
-        $term = $api->getTermByFolksaurusId(self::FOO_FOLKSAURUS_ID);
+        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $term = $termManager->getTermByFolksaurusId(self::FOO_FOLKSAURUS_ID);
 
         $this->assertTrue($term instanceof Term);
         $this->assertEquals('Foo', $term->getName());
@@ -309,8 +309,8 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $mockDI->expects($this->never())
             ->method('saveTerm');
 
-        $api = new Api($mockDI, CONFIG_PATH, $mockRex);
-        $term = $api->getTermByFolksaurusId(self::FOO_FOLKSAURUS_ID);
+        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $term = $termManager->getTermByFolksaurusId(self::FOO_FOLKSAURUS_ID);
 
         $this->assertTrue($term instanceof Term);
         $this->assertEquals('Foo', $term->getName());
@@ -346,8 +346,8 @@ class ApiTest extends \PHPUnit_Framework_TestCase
             ->method('saveTerm')
             ->with($this->isInstanceOf('Folksaurus\Term'));
 
-        $api = new Api($mockDI, CONFIG_PATH, $mockRex);
-        $term = $api->getTermByFolksaurusId(self::FOO_FOLKSAURUS_ID);
+        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $term = $termManager->getTermByFolksaurusId(self::FOO_FOLKSAURUS_ID);
 
         $this->assertTrue($term instanceof Term);
         $this->assertEquals('Foo', $term->getName());
@@ -384,8 +384,8 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $mockDI->expects($this->never())
             ->method('saveTerm');
 
-        $api = new Api($mockDI, CONFIG_PATH, $mockRex);
-        $term = $api->getTermByFolksaurusId(self::FOO_FOLKSAURUS_ID);
+        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $term = $termManager->getTermByFolksaurusId(self::FOO_FOLKSAURUS_ID);
 
         $this->assertTrue($term instanceof Term);
         $this->assertEquals('Foo', $term->getName());
@@ -422,8 +422,8 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $mockDI->expects($this->never())
             ->method('saveTerm');
 
-        $api = new Api($mockDI, CONFIG_PATH, $mockRex);
-        $term = $api->getOrCreateTerm('Foo');
+        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $term = $termManager->getOrCreateTerm('Foo');
 
         $this->assertTrue($term instanceof Term);
         $this->assertEquals('Foo', $term->getName());
@@ -459,8 +459,8 @@ class ApiTest extends \PHPUnit_Framework_TestCase
             ->method('saveTerm')
             ->with($this->isInstanceOf('Folksaurus\Term'));
 
-        $api = new Api($mockDI, CONFIG_PATH, $mockRex);
-        $term = $api->getOrCreateTerm('Foo');
+        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $term = $termManager->getOrCreateTerm('Foo');
 
         $this->assertTrue($term instanceof Term);
         $this->assertEquals('Foo', $term->getName());
@@ -488,8 +488,8 @@ class ApiTest extends \PHPUnit_Framework_TestCase
             ->method('saveTerm')
             ->with($this->isInstanceOf('Folksaurus\Term'));
 
-        $api = new Api($mockDI, CONFIG_PATH, $mockRex);
-        $term = $api->getOrCreateTerm('Foo');
+        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $term = $termManager->getOrCreateTerm('Foo');
 
         $this->assertTrue($term instanceof Term);
         $this->assertEquals('Foo', $term->getName());
@@ -516,8 +516,8 @@ class ApiTest extends \PHPUnit_Framework_TestCase
             ->method('saveTerm')
             ->with($this->isInstanceOf('Folksaurus\Term'));
 
-        $api = new Api($mockDI, CONFIG_PATH, $mockRex);
-        $term = $api->getOrCreateTerm('Foo');
+        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $term = $termManager->getOrCreateTerm('Foo');
 
         $this->assertTrue($term instanceof Term);
         $this->assertEquals('Foo', $term->getName());
@@ -554,8 +554,8 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $mockDI->expects($this->never())
             ->method('saveTerm');
 
-        $api = new Api($mockDI, CONFIG_PATH, $mockRex);
-        $term = $api->getOrCreateTerm('Foo');
+        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $term = $termManager->getOrCreateTerm('Foo');
 
         $this->assertFalse($term);
     }
@@ -589,8 +589,8 @@ class ApiTest extends \PHPUnit_Framework_TestCase
         $mockDI->expects($this->never())
             ->method('deleteTerm');
 
-        $api = new Api($mockDI, CONFIG_PATH, $mockRex);
-        $term = $api->getOrCreateTerm('Foo');
+        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $term = $termManager->getOrCreateTerm('Foo');
 
         $this->assertFalse($term);
     }

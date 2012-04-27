@@ -70,10 +70,10 @@ class TermTest extends \PHPUnit_Framework_TestCase
 
     public function testAccessorMethods()
     {
-        $mockApi = $this->getMock('Folksaurus\Api', array(), array(), '', false);
+        $mockTm = $this->getMock('Folksaurus\TermManager', array(), array(), '', false);
 
         $termArray = $this->_getPreferredTermArray();
-        $term = new Term($termArray, $mockApi);
+        $term = new Term($termArray, $mockTm);
 
         $this->assertEquals('1', $term->getId());
         $this->assertEquals('Foo', $term->getName());
@@ -108,34 +108,34 @@ class TermTest extends \PHPUnit_Framework_TestCase
 
     public function testGetPreferredOnNonpreferredTermCallsGetTermByFolksaurusIdOnApiObject()
     {
-        $mockApi = $this->getMock('Folksaurus\Api', array(), array(), '', false);
+        $mockTm = $this->getMock('Folksaurus\TermManager', array(), array(), '', false);
 
-        $preferredTerm = new Term($this->_getPreferredTermArray(), $mockApi);
+        $preferredTerm = new Term($this->_getPreferredTermArray(), $mockTm);
 
-        $mockApi->expects($this->once())
+        $mockTm->expects($this->once())
             ->method('getTermByFolksaurusId')
             ->with($this->equalTo('1'))
             ->will($this->returnValue($preferredTerm));
 
-        $term = new Term($this->_getNonPreferredTermArray(), $mockApi);
+        $term = new Term($this->_getNonPreferredTermArray(), $mockTm);
         $returnValue = $term->getPreferred();
         $this->assertEquals($preferredTerm, $returnValue);
     }
 
     public function testGetPreferredOnPreferredTermReturnsItself()
     {
-        $mockApi = $this->getMock('Folksaurus\Api', array(), array(), '', false);
+        $mockTm = $this->getMock('Folksaurus\TermManager', array(), array(), '', false);
 
-        $term = new Term($this->_getPreferredTermArray(), $mockApi);
+        $term = new Term($this->_getPreferredTermArray(), $mockTm);
         $returnValue = $term->getPreferred();
         $this->assertEquals($term, $returnValue);
     }
 
     public function testGetPreferredOnUnsortedTermReturnsItself()
     {
-        $mockApi = $this->getMock('Folksaurus\Api', array(), array(), '', false);
+        $mockTm = $this->getMock('Folksaurus\TermManager', array(), array(), '', false);
 
-        $term = new Term($this->_getUnsortedTermArray(), $mockApi);
+        $term = new Term($this->_getUnsortedTermArray(), $mockTm);
         $returnValue = $term->getPreferred();
         $this->assertEquals($term, $returnValue);
     }
@@ -143,8 +143,8 @@ class TermTest extends \PHPUnit_Framework_TestCase
     public function testGetPreferredForAmbiguousTermReturnsArrayOfResultsOfGetByFolkIdCalls()
     {
         // If term is ambiguous, it returns an array of Term objects.
-        $mockApi = $this->getMock('Folksaurus\Api', array(), array(), '', false);
-        $dummyApi = $this->getMock('Folksaurus\Api', array(), array(), '', false);
+        $mockTm = $this->getMock('Folksaurus\TermManager', array(), array(), '', false);
+        $dummyApi = $this->getMock('Folksaurus\TermManager', array(), array(), '', false);
 
         $termPhooArray = array(
             'id'         => '5',
@@ -162,17 +162,17 @@ class TermTest extends \PHPUnit_Framework_TestCase
             $dummyApi
         );
 
-        $mockApi->expects($this->at(0))
+        $mockTm->expects($this->at(0))
             ->method('getTermByFolksaurusId')
             ->with($this->equalTo('1'))
             ->will($this->returnValue($termFoo));
 
-        $mockApi->expects($this->at(1))
+        $mockTm->expects($this->at(1))
             ->method('getTermByFolksaurusId')
             ->with($this->equalTo('5'))
             ->will($this->returnValue($termPhoo));
 
-        $term = new Term($this->_getAmbiguousTermArray(), $mockApi);
+        $term = new Term($this->_getAmbiguousTermArray(), $mockTm);
         $returnValue = $term->getPreferred();
         $this->assertEquals(2, count($returnValue));
         $this->assertEquals($termFoo, $returnValue[0]);
@@ -183,9 +183,9 @@ class TermTest extends \PHPUnit_Framework_TestCase
     public function testGetStatusReturnsPreferredIfTermHasRelationshipsOtherThanUse()
     {
         $mockDI = $this->getMock('Folksaurus\DataInterface');
-        $api = new Api($mockDI);
+        $termManager = new TermManager($mockDI);
 
-        $preferredTerm = new Term($this->_getPreferredTermArray(), $api);
+        $preferredTerm = new Term($this->_getPreferredTermArray(), $termManager);
 
         $this->assertEquals(Term::STATUS_PREFERRED, $preferredTerm->getStatus());
     }
@@ -193,9 +193,9 @@ class TermTest extends \PHPUnit_Framework_TestCase
     public function testGetStatusReturnsNonPreferredIfTermHasUseRelationships()
     {
         $mockDI = $this->getMock('Folksaurus\DataInterface');
-        $api = new Api($mockDI);
+        $termManager = new TermManager($mockDI);
 
-        $nonPreferredTerm = new Term($this->_getNonPreferredTermArray(), $api);
+        $nonPreferredTerm = new Term($this->_getNonPreferredTermArray(), $termManager);
 
         $this->assertEquals(Term::STATUS_NONPREFERRED, $nonPreferredTerm->getStatus());
     }
@@ -203,9 +203,9 @@ class TermTest extends \PHPUnit_Framework_TestCase
     public function testGetStatusReturnsUnsortedIfTermHasNoRelationships()
     {
         $mockDI = $this->getMock('Folksaurus\DataInterface');
-        $api = new Api($mockDI);
+        $termManager = new TermManager($mockDI);
 
-        $unsortedTerm = new Term($this->_getUnsortedTermArray(), $api);
+        $unsortedTerm = new Term($this->_getUnsortedTermArray(), $termManager);
 
         $this->assertEquals(Term::STATUS_UNSORTED, $unsortedTerm->getStatus());
     }
@@ -213,12 +213,12 @@ class TermTest extends \PHPUnit_Framework_TestCase
     public function testIsAmbiguousReturnsTrueIfTermHasMoreThanOneUseRelationships()
     {
         $mockDI = $this->getMock('Folksaurus\DataInterface');
-        $api = new Api($mockDI);
+        $termManager = new TermManager($mockDI);
 
-        $preferredTerm = new Term($this->_getPreferredTermArray(), $api);
-        $nonPreferredTerm = new Term($this->_getNonPreferredTermArray(), $api);
-        $unsortedTerm = new Term($this->_getUnsortedTermArray(), $api);
-        $ambiguousTerm = new Term($this->_getAmbiguousTermArray(), $api);
+        $preferredTerm = new Term($this->_getPreferredTermArray(), $termManager);
+        $nonPreferredTerm = new Term($this->_getNonPreferredTermArray(), $termManager);
+        $unsortedTerm = new Term($this->_getUnsortedTermArray(), $termManager);
+        $ambiguousTerm = new Term($this->_getAmbiguousTermArray(), $termManager);
 
         $this->assertFalse($preferredTerm->isAmbiguous());
         $this->assertFalse($nonPreferredTerm->isAmbiguous());

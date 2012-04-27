@@ -1,11 +1,8 @@
 <?php
-/**
- * Object representing a Folksaurus term.
- */
 namespace Folksaurus;
 
 /**
- * An object representing a term.
+ * Representation of a term.
  */
 class Term
 {
@@ -83,11 +80,11 @@ class Term
     protected $_appId = '';
 
     /**
-     * An Api object, which is used to get info on related terms.
+     * A TermManager object, which is used to get info on related terms.
      *
-     * @var Api
+     * @var TermManager
      */
-    protected $_api;
+    protected $_termManager;
 
     /**
      * Constructor
@@ -117,10 +114,10 @@ class Term
      * </pre>
      *
      * @var array $values
-     * @param Api $api
+     * @param TermManager $termManager
      * @throws Exception  if required keys missing from $values.
      */
-    public function __construct(array $values, Api $api)
+    public function __construct(array $values, TermManager $termManager)
     {
         if (!isset($values['name']) || !$values['name']) {
             throw new Exception('Term must have a value set for name');
@@ -140,7 +137,7 @@ class Term
 
         $termValues = array_merge($defaultValues, $values);
 
-        $this->_api           = $api;
+        $this->_termManager           = $termManager;
         $this->_id            = $termValues['id'];
         $this->_name          = $termValues['name'];
         $this->_scopeNote     = $termValues['scope_note'];
@@ -150,31 +147,31 @@ class Term
         foreach ($termValues['broader'] as $broader) {
             $this->_broaderTerms[] = new TermSummary(
                 $broader,
-                $api
+                $termManager
             );
         }
         foreach ($termValues['narrower'] as $narrower) {
             $this->_narrowerTerms[] = new TermSummary(
                 $narrower,
-                $api
+                $termManager
             );
         }
         foreach ($termValues['related'] as $related) {
             $this->_relatedTerms[] = new TermSummary(
                 $related,
-                $api
+                $termManager
             );
         }
         foreach ($termValues['used_for'] as $usedFor) {
             $this->_usedForTerms[] = new TermSummary(
                 $usedFor,
-                $api
+                $termManager
             );
         }
         foreach ($termValues['use'] as $use) {
             $this->_useTerms[] = new TermSummary(
                 $use,
-                $api
+                $termManager
             );
         }
     }
@@ -275,11 +272,11 @@ class Term
         }
         $useTerms = $this->getUseTerms();
         if (count($useTerms) == 1) {
-            return $this->_api->getTermByFolksaurusId($useTerms[0]->getId());
+            return $this->_termManager->getTermByFolksaurusId($useTerms[0]->getId());
         }
         $preferredTerms = array();
         foreach ($useTerms as $useTerm) {
-            $preferredTerms[] = $this->_api->getTermByFolksaurusId(
+            $preferredTerms[] = $this->_termManager->getTermByFolksaurusId(
                 $useTerm->getId()
             );
         }

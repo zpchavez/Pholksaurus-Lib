@@ -1,12 +1,8 @@
 <?php
-/**
- * Object representing a Folksaurus term.
- */
 namespace Folksaurus;
 
 /**
- * An object representing the ID and name of a term,
- * but not the scope note or relationships.
+ * Term representation that includes only the name and ID.
  */
 class TermSummary
 {
@@ -26,23 +22,23 @@ class TermSummary
 
 
     /**
-     * An Api object, which is used to get info on related terms.
+     * A TermManager object, which is used to get info on related terms.
      *
-     * @var Api
+     * @var TermManager
      */
-    protected $_api;
+    protected $_termManager;
 
     /**
      * Constructor.
      *
      * @param array $values  An array with keys "id" and "name".
-     * @param Api $api
+     * @param TermManager $termManager
      */
-    public function __construct(array $values, Api $api)
+    public function __construct(array $values, TermManager $termManager)
     {
         $this->_id   = $values['id'];
         $this->_name = $values['name'];
-        $this->_api  = $api;
+        $this->_termManager  = $termManager;
     }
 
     /**
@@ -52,7 +48,7 @@ class TermSummary
      */
     public function getCompleteTerm()
     {
-        return $this->_api->getTermByFolksaurusId($this->_id);
+        return $this->_termManager->getTermByFolksaurusId($this->_id);
     }
 
     /**
