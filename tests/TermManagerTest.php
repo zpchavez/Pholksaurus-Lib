@@ -32,10 +32,12 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByAppIdForTermNotFoundInDbMakesNoRequestAndReturnsFalse()
     {
-        $mockDI  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('getTermByAppId')
             ->with($this->equalTo(StatusCodes::NOT_FOUND))
             ->will($this->returnValue(false));
@@ -46,7 +48,7 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
         $mockRex->expects($this->never())
             ->method('getTermByIdIfModifiedSince');
 
-        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
         $term = $termManager->getTermByAppId(StatusCodes::NOT_FOUND);
 
         $this->assertFalse($term);
@@ -54,14 +56,16 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByAppIdForNonExpiredTermDoesNotMakeARequestOrUpdateTerm()
     {
-        $mockDI  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $justNow = time();
         $fooTermArray = $this->_getFooTermArray();
         $fooTermArray['last_retrieved'] = $justNow;
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('getTermByAppId')
             ->with($this->equalTo(self::FOO_APP_ID))
             ->will($this->returnValue($fooTermArray));
@@ -73,10 +77,10 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
             ->method('getTermByIdIfModifiedSince');
 
         // Won't save, because no changes were retrieved.
-        $mockDI->expects($this->never())
+        $mockDataInterface->expects($this->never())
             ->method('saveTerm');
 
-        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
         $term = $termManager->getTermByAppId(self::FOO_APP_ID);
 
         $this->assertTrue($term instanceof Term);
@@ -87,14 +91,16 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByAppIdForModifiedExpiredTermMakesRequestAndUpdatesTerm()
     {
-        $mockDI  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $yesterday = time() - (60 * 60 * 24);
         $fooTermArray = $this->_getFooTermArray();
         $fooTermArray['last_retrieved'] = $yesterday;
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('getTermByAppId')
             ->with($this->equalTo(self::FOO_APP_ID))
             ->will($this->returnValue($fooTermArray));
@@ -111,11 +117,11 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
             )->will($this->returnValue($updatedFooTermArray));
 
         // Save latest term info.
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('saveTerm')
             ->with($this->isInstanceOf('Folksaurus\Term'));
 
-        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
 
         $term = $termManager->getTermByAppId(self::FOO_APP_ID);
 
@@ -129,14 +135,16 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGettingTermThatWasDeletedRemotelyCallsDeleteTermAndReturnsFalse()
     {
-        $mockDI  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $yesterday = time() - (60 * 60 * 24);
         $fooTermArray = $this->_getFooTermArray();
         $fooTermArray['last_retrieved'] = $yesterday;
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('getTermByAppId')
             ->with($this->equalTo(self::FOO_APP_ID))
             ->will($this->returnValue($fooTermArray));
@@ -156,14 +164,14 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
             ->method('getLatestResponseCode')
             ->will($this->returnValue(StatusCodes::GONE));
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('deleteTerm')
             ->with($this->equalTo($fooTermArray['app_id']));
 
-        $mockDI->expects($this->never())
+        $mockDataInterface->expects($this->never())
             ->method('saveTerm');
 
-        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
 
         $term = $termManager->getTermByAppId(self::FOO_APP_ID);
 
@@ -172,14 +180,16 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByAppIdForUnmodifiedExpiredTermMakesRequestAndUpdatesModTime()
     {
-        $mockDI  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $yesterday = time() - (60 * 60 * 24);
         $fooTermArray = $this->_getFooTermArray();
         $fooTermArray['last_retrieved'] = $yesterday;
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('getTermByAppId')
             ->with($this->equalTo(self::FOO_APP_ID))
             ->will($this->returnValue($fooTermArray));
@@ -199,10 +209,10 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(StatusCodes::NOT_MODIFIED));
 
         // Term saved in order to update the last modified time.
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('saveTerm');
 
-        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
 
         $term = $termManager->getTermByAppId(self::FOO_APP_ID);
 
@@ -216,15 +226,17 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByAppIdForExpiredTermWithNoFolksaurusIdGetsByNameAndSavesTerm()
     {
-        $mockDI  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $yesterday = time() - (60 * 60 * 24);
         $fooTermArray = $this->_getFooTermArray();
         $fooTermArray['last_retrieved'] = $yesterday;
         $fooTermArray['id'] = '0';
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('getTermByAppId')
             ->with($this->equalTo(self::FOO_APP_ID))
             ->will($this->returnValue($fooTermArray));
@@ -240,11 +252,11 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($updatedFooTermArray));
 
         // Save latest term info.
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('saveTerm')
             ->with($this->isInstanceOf('Folksaurus\Term'));
 
-        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
 
         $term = $termManager->getTermByAppId(self::FOO_APP_ID);
 
@@ -258,10 +270,12 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByFolksaurusIdForTermNotInDbMakesRequestAndSavesNewTermIfFound()
     {
-        $mockDI  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('getTermByFolksaurusId')
             ->with($this->equalTo(self::FOO_FOLKSAURUS_ID))
             ->will($this->returnValue(false));
@@ -273,11 +287,11 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($this->_getFooTermArray()));
 
         // Save the term to the database.
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('saveTerm')
             ->with($this->isInstanceOf('Folksaurus\Term'));
 
-        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
         $term = $termManager->getTermByFolksaurusId(self::FOO_FOLKSAURUS_ID);
 
         $this->assertTrue($term instanceof Term);
@@ -290,13 +304,15 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByFolksaurusIdForNonExpiredTermMakesNoRequestAndDoesNotUpdateTerm()
     {
-        $mockDI  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $fooTermArray = $this->_getFooTermArray();
         $fooTermArray['last_retrieved'] = time();
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('getTermByFolksaurusId')
             ->with($this->equalTo(self::FOO_FOLKSAURUS_ID))
             ->will($this->returnValue($fooTermArray));
@@ -306,10 +322,10 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
             ->method('getTermById');
 
         // Won't save, because no changes were retrieved.
-        $mockDI->expects($this->never())
+        $mockDataInterface->expects($this->never())
             ->method('saveTerm');
 
-        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
         $term = $termManager->getTermByFolksaurusId(self::FOO_FOLKSAURUS_ID);
 
         $this->assertTrue($term instanceof Term);
@@ -320,14 +336,16 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByFolksaurusIdForExpiredModifiedTermMakesRequestAndUpdatesTerm()
     {
-        $mockDI  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $yesterday = time() - (60 * 60 * 24);
         $fooTermArray = $this->_getFooTermArray();
         $fooTermArray['last_retrieved'] = $yesterday;
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('getTermByFolksaurusId')
             ->with($this->equalTo(self::FOO_FOLKSAURUS_ID))
             ->will($this->returnValue($fooTermArray));
@@ -342,11 +360,11 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue($updatedFooTermArray));
 
         // Save latest term info.
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('saveTerm')
             ->with($this->isInstanceOf('Folksaurus\Term'));
 
-        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
         $term = $termManager->getTermByFolksaurusId(self::FOO_FOLKSAURUS_ID);
 
         $this->assertTrue($term instanceof Term);
@@ -359,14 +377,16 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByFolksaurusIdForExpiredUnmodifiedTermMakesRequestButDoesNotUpdate()
     {
-        $mockDI  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $yesterday = time() - (60 * 60 * 24);
         $fooTermArray = $this->_getFooTermArray();
         $fooTermArray['last_retrieved'] = $yesterday;
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('getTermByFolksaurusId')
             ->with($this->equalTo(self::FOO_FOLKSAURUS_ID))
             ->will($this->returnValue($fooTermArray));
@@ -381,10 +401,10 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(false));
 
         // No term saved since there were no changes.
-        $mockDI->expects($this->never())
+        $mockDataInterface->expects($this->never())
             ->method('saveTerm');
 
-        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
         $term = $termManager->getTermByFolksaurusId(self::FOO_FOLKSAURUS_ID);
 
         $this->assertTrue($term instanceof Term);
@@ -397,13 +417,15 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetOrCreateTermGetsTermFromDbIfItExistsAndIsCurrent()
     {
-        $mockDI  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $fooTermArray = $this->_getFooTermArray();
         $fooTermArray['last_retrieved'] = time();
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('getTermByName')
             ->with($this->equalTo('Foo'))
             ->will($this->returnValue($fooTermArray));
@@ -419,10 +441,10 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
             ->method('createTerm');
 
         // Won't save, because no changes were retrieved.
-        $mockDI->expects($this->never())
+        $mockDataInterface->expects($this->never())
             ->method('saveTerm');
 
-        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
         $term = $termManager->getOrCreateTerm('Foo');
 
         $this->assertTrue($term instanceof Term);
@@ -433,14 +455,16 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetOrCreateTermGetsLatestVersionOfTermIfItExistsInDbButIsPassedExpireTime()
     {
-        $mockDI  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $yesterday = time() - (60 * 60 * 24);
         $fooTermArray = $this->_getFooTermArray();
         $fooTermArray['last_retrieved'] = $yesterday;
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('getTermByName')
             ->with($this->equalTo('Foo'))
             ->will($this->returnValue($fooTermArray));
@@ -455,11 +479,11 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
                 $this->equalTo($yesterday)
             )->will($this->returnValue($updatedFooTermArray));
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('saveTerm')
             ->with($this->isInstanceOf('Folksaurus\Term'));
 
-        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
         $term = $termManager->getOrCreateTerm('Foo');
 
         $this->assertTrue($term instanceof Term);
@@ -471,10 +495,12 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetOrCreateTermGetsOrCreatesTermInFolksaurusThenAddsItToTheDb()
     {
-        $mockDI  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('getTermByName')
             ->with($this->equalTo('Foo'))
             ->will($this->returnValue(false));
@@ -484,11 +510,11 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
             ->with('Foo')
             ->will($this->returnValue($this->_getFooTermArray()));
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('saveTerm')
             ->with($this->isInstanceOf('Folksaurus\Term'));
 
-        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
         $term = $termManager->getOrCreateTerm('Foo');
 
         $this->assertTrue($term instanceof Term);
@@ -499,10 +525,12 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetOrCreateTermCreatesTermLocallyIfUnableToCreateItInFolksaurus()
     {
-        $mockDI  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('getTermByName')
             ->with($this->equalTo('Foo'))
             ->will($this->returnValue(false));
@@ -512,11 +540,11 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
             ->with('Foo')
             ->will($this->returnValue(false));
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('saveTerm')
             ->with($this->isInstanceOf('Folksaurus\Term'));
 
-        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
         $term = $termManager->getOrCreateTerm('Foo');
 
         $this->assertTrue($term instanceof Term);
@@ -526,12 +554,14 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetOrCreateOnRemotelyDeletedTermInDbReturnsFalseAndCallsDeleteTerm()
     {
-        $mockDI  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $fooTermArray = $this->_getFooTermArray();
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('getTermByName')
             ->with($this->equalTo('Foo'))
             ->will($this->returnValue($fooTermArray));
@@ -547,14 +577,14 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
             ->method('getLatestResponseCode')
             ->will($this->returnValue(StatusCodes::GONE));
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('deleteTerm')
             ->with($this->equalTo($fooTermArray['app_id']));
 
-        $mockDI->expects($this->never())
+        $mockDataInterface->expects($this->never())
             ->method('saveTerm');
 
-        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
         $term = $termManager->getOrCreateTerm('Foo');
 
         $this->assertFalse($term);
@@ -562,12 +592,14 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetOrCreateOnRemotelyDeletedTermNotinDbReturnsFalseAndDoesNotSaveTerm()
     {
-        $mockDI  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMock('Folksaurus\RequestExecutor', array(), array(), '', false);
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $fooTermArray = $this->_getFooTermArray();
 
-        $mockDI->expects($this->once())
+        $mockDataInterface->expects($this->once())
             ->method('getTermByName')
             ->with($this->equalTo('Foo'))
             ->will($this->returnValue(false));
@@ -582,14 +614,14 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
             ->method('getLatestResponseCode')
             ->will($this->returnValue(StatusCodes::FORBIDDEN));
 
-        $mockDI->expects($this->never())
+        $mockDataInterface->expects($this->never())
             ->method('saveTerm');
 
         // Delete not called because there is no local term to delete.
-        $mockDI->expects($this->never())
+        $mockDataInterface->expects($this->never())
             ->method('deleteTerm');
 
-        $termManager = new TermManager($mockDI, CONFIG_PATH, $mockRex);
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
         $term = $termManager->getOrCreateTerm('Foo');
 
         $this->assertFalse($term);

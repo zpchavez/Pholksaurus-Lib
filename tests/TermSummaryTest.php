@@ -8,7 +8,9 @@ class TermSummaryTest extends \PHPUnit_Framework_TestCase
 {
     public function testGetCompleteTermReturnsResultsOfGetTermByFolksaurusIdCallOnTermManagerObject()
     {
-        $mockTm = $this->getMock('Folksaurus\TermManager', array(), array(), '', false);
+        $mockTermManager = $this->getMockBuilder('Folksaurus\TermManager')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $termArray = array(
             'id'         => '1',
@@ -22,12 +24,12 @@ class TermSummaryTest extends \PHPUnit_Framework_TestCase
         );
 
 
-        $mockTm->expects($this->once())
+        $mockTermManager->expects($this->once())
             ->method('getTermByFolksaurusId')
             ->with($this->equalTo('1'))
             ->will($this->returnValue($termArray));
 
-        $termSummary = new TermSummary(array('id' => '1', 'name' => 'Foo'), $mockTm);
+        $termSummary = new TermSummary(array('id' => '1', 'name' => 'Foo'), $mockTermManager);
         $returnValue = $termSummary->getCompleteTerm();
         $this->assertEquals($termArray, $returnValue);
     }
