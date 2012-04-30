@@ -114,6 +114,29 @@ class TermManager
     }
 
     /**
+     * Get a term by its name.
+     *
+     * @param type $name
+     * @return Term|bool  False if not found.
+     */
+    public function getTermByName($name)
+    {
+        $termArray = $this->_dataInterface->getTermByName($name);
+        if ($termArray) {
+            $term = new Term($termArray, $this);
+            return $this->_getLatestTerm($term);
+        }
+        $termArray = $this->_rex->getTermByName($name);
+        if ($termArray) {
+            $termArray['last_retrieved'] = time();
+            $term = new Term($termArray, $this);
+            $this->_dataInterface->saveTerm($term);
+            return $term;
+        }
+        return false;
+    }
+
+    /**
      * Get a term by its name.  If it doesn't exist, create it.
      *
      * @param string $name

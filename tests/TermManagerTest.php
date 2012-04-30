@@ -523,6 +523,140 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(self::FOO_APP_ID, $term->getAppId());
     }
 
+    public function testGetTermByNameGetsTermFromDbIfItExistsAndIsCurrent()
+    {
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $fooTermArray = $this->_getFooTermArray();
+        $fooTermArray['last_retrieved'] = time();
+
+        $mockDataInterface->expects($this->once())
+            ->method('getTermByName')
+            ->with($this->equalTo('Foo'))
+            ->will($this->returnValue($fooTermArray));
+
+        // Won't send a request to Folksaurus, because term was retrieved recently.
+        $mockRex->expects($this->never())
+            ->method('getTermByName');
+        $mockRex->expects($this->never())
+            ->method('getTermByIdIfModifiedSince');
+        $mockRex->expects($this->never())
+            ->method('getOrCreateTerm');
+        $mockRex->expects($this->never())
+            ->method('createTerm');
+
+        // Won't save, because no changes were retrieved.
+        $mockDataInterface->expects($this->never())
+            ->method('saveTerm');
+
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
+        $term = $termManager->getTermByName('Foo');
+
+        $this->assertTrue($term instanceof Term);
+        $this->assertEquals('Foo', $term->getName());
+        $this->assertEquals(self::FOO_FOLKSAURUS_ID, $term->getId());
+        $this->assertEquals(self::FOO_APP_ID, $term->getAppId());
+    }
+
+    public function testGetTermByNameGetsLatestVersionOfTermIfItExistsInDbButIsPassedExpireTime()
+    {
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $yesterday = time() - (60 * 60 * 24);
+        $fooTermArray = $this->_getFooTermArray();
+        $fooTermArray['last_retrieved'] = $yesterday;
+
+        $mockDataInterface->expects($this->once())
+            ->method('getTermByName')
+            ->with($this->equalTo('Foo'))
+            ->will($this->returnValue($fooTermArray));
+
+        $updatedFooTermArray = $fooTermArray;
+        $updatedFooTermArray['scope_note'] = 'Updated scope note';
+
+        $mockRex->expects($this->once())
+            ->method('getTermByIdIfModifiedSince')
+            ->with(
+                $this->equalTo(self::FOO_FOLKSAURUS_ID),
+                $this->equalTo($yesterday)
+            )->will($this->returnValue($updatedFooTermArray));
+
+        $mockDataInterface->expects($this->once())
+            ->method('saveTerm')
+            ->with($this->isInstanceOf('Folksaurus\Term'));
+
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
+        $term = $termManager->getTermByName('Foo');
+
+        $this->assertTrue($term instanceof Term);
+        $this->assertEquals('Foo', $term->getName());
+        $this->assertEquals('Updated scope note', $term->getScopeNote());
+        $this->assertEquals(self::FOO_FOLKSAURUS_ID, $term->getId());
+        $this->assertEquals(self::FOO_APP_ID, $term->getAppId());
+    }
+
+    public function testGetTermByNameCreatesTermInDbIfItExistsInFolksaurusButNotTheDb()
+    {
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $mockDataInterface->expects($this->once())
+            ->method('getTermByName')
+            ->with($this->equalTo('Foo'))
+            ->will($this->returnValue(false));
+
+        $mockRex->expects($this->once())
+            ->method('getTermByName')
+            ->with('Foo')
+            ->will($this->returnValue($this->_getFooTermArray()));
+
+        $mockDataInterface->expects($this->once())
+            ->method('saveTerm')
+            ->with($this->isInstanceOf('Folksaurus\Term'));
+
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
+        $term = $termManager->getTermByName('Foo');
+
+        $this->assertTrue($term instanceof Term);
+        $this->assertEquals('Foo', $term->getName());
+        $this->assertEquals(self::FOO_FOLKSAURUS_ID, $term->getId());
+        $this->assertEquals(self::FOO_APP_ID, $term->getAppId());
+    }
+
+    public function testGetTermByNameReturnsFalseIfNotFoundInDbOrFolksaurus()
+    {
+        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
+        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $mockDataInterface->expects($this->once())
+            ->method('getTermByName')
+            ->with($this->equalTo('Foo'))
+            ->will($this->returnValue(false));
+
+        $mockRex->expects($this->once())
+            ->method('getTermByName')
+            ->with('Foo')
+            ->will($this->returnValue(false));
+
+        $mockDataInterface->expects($this->never())
+            ->method('saveTerm');
+
+        $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
+        $term = $termManager->getTermByName('Foo');
+
+        $this->assertFalse($term);
+    }
+
     public function testGetOrCreateTermCreatesTermLocallyIfUnableToCreateItInFolksaurus()
     {
         $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
