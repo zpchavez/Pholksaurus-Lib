@@ -116,6 +116,10 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
                 $this->equalTo($yesterday)
             )->will($this->returnValue($updatedFooTermArray));
 
+        $mockRex->expects($this->once())
+            ->method('getLatestResponseCode')
+            ->will($this->returnValue(StatusCodes::OK));
+
         // Save latest term info.
         $mockDataInterface->expects($this->once())
             ->method('saveTerm')
@@ -251,6 +255,10 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
             ->with($this->equalTo('Foo'))
             ->will($this->returnValue($updatedFooTermArray));
 
+        $mockRex->expects($this->once())
+            ->method('getLatestResponseCode')
+            ->will($this->returnValue(StatusCodes::OK));
+
         // Save latest term info.
         $mockDataInterface->expects($this->once())
             ->method('saveTerm')
@@ -358,6 +366,10 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
             ->method('getTermByIdIfModifiedSince')
             ->with($this->equalTo(self::FOO_FOLKSAURUS_ID))
             ->will($this->returnValue($updatedFooTermArray));
+
+        $mockRex->expects($this->once())
+            ->method('getLatestResponseCode')
+            ->will($this->returnValue(StatusCodes::OK));
 
         // Save latest term info.
         $mockDataInterface->expects($this->once())
@@ -479,6 +491,10 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
                 $this->equalTo($yesterday)
             )->will($this->returnValue($updatedFooTermArray));
 
+        $mockRex->expects($this->once())
+            ->method('getLatestResponseCode')
+            ->will($this->returnValue(StatusCodes::OK));
+
         $mockDataInterface->expects($this->once())
             ->method('saveTerm')
             ->with($this->isInstanceOf('Folksaurus\Term'));
@@ -586,6 +602,10 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
                 $this->equalTo(self::FOO_FOLKSAURUS_ID),
                 $this->equalTo($yesterday)
             )->will($this->returnValue($updatedFooTermArray));
+
+        $mockRex->expects($this->once())
+            ->method('getLatestResponseCode')
+            ->will($this->returnValue(StatusCodes::OK));
 
         $mockDataInterface->expects($this->once())
             ->method('saveTerm')
@@ -743,10 +763,10 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
             ->with($this->equalTo('Foo'))
             ->will($this->returnValue(false));
 
-        // The FORBIDDEN code is returned when trying to PUT a term that has been deleted.
+        // The GONE code is returned when trying to PUT a term that has been deleted.
         $mockRex->expects($this->once())
             ->method('getLatestResponseCode')
-            ->will($this->returnValue(StatusCodes::FORBIDDEN));
+            ->will($this->returnValue(StatusCodes::GONE));
 
         $mockDataInterface->expects($this->never())
             ->method('saveTerm');

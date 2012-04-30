@@ -155,8 +155,7 @@ class TermManager
             $term = new Term($termArray, $this);
             $this->_dataInterface->saveTerm($term);
             return $term;
-        } else if ($this->_rex->getLatestResponseCode() == StatusCodes::FORBIDDEN ||
-                   $this->_rex->getLatestResponseCode() == StatusCodes::GONE) {
+        } else if ($this->_rex->getLatestResponseCode() == StatusCodes::GONE) {
             return false;
         } else {
             // If term not retrieved or created for some other reason, create a
@@ -219,27 +218,31 @@ class TermManager
                 $updatedTermArray = $this->_rex->getOrCreateTerm($term->getName());
             }
 
-            // If found, update term and save.
-            if ($updatedTermArray) {
-                $updatedTermArray['last_retrieved'] = time();
-                $updatedTermArray['app_id'] = $term->getAppId();
-                $updatedTerm = new Term($updatedTermArray, $this);
-                $this->_dataInterface->saveTerm($updatedTerm);
-                return $updatedTerm;
-            }
-
-            // If not found, use response code to determine action to take.
-            switch ($this->_rex->getLatestResponseCode()) {
+            $responseCode = $this->_rex->getLatestResponseCode();
+            switch ($responseCode) {
+                // CONFLICT code is received for a PUT request for an existing term.
+                // The content returned in that case is the data for that term, just as if
+                // it had been a GET request, so $updatedTermArray will contain exactly that.
+                case StatusCodes::CONFLICT:
+                    // Intentional fall-through
+                case StatusCodes::CREATED:
+                    // Intentional fall-through.
+                case StatusCodes::OK:
+                    $updatedTermArray['last_retrieved'] = time();
+                    $updatedTermArray['app_id'] = $term->getAppId();
+                    $updatedTerm = new Term($updatedTermArray, $this);
+                    $this->_dataInterface->saveTerm($updatedTerm);
+                    return $updatedTerm;
+                    break;
                 case StatusCodes::NOT_MODIFIED:
                     $term->updateLastRetrievedTime();
                     $this->_dataInterface->saveTerm($term);
                     break;
                 case StatusCodes::GONE:
-                    // Intentional fall-through.
-                case StatusCodes::FORBIDDEN:
                     $this->_dataInterface->deleteTerm($term->getAppId());
                     return false;
                     break;
+                // Other responses are possible, but require no action.
             }
         }
         return $term;
