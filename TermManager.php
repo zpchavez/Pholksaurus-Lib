@@ -220,11 +220,6 @@ class TermManager
 
             $responseCode = $this->_rex->getLatestResponseCode();
             switch ($responseCode) {
-                // CONFLICT code is received for a PUT request for an existing term.
-                // The content returned in that case is the data for that term, just as if
-                // it had been a GET request, so $updatedTermArray will contain exactly that.
-                case StatusCodes::CONFLICT:
-                    // Intentional fall-through
                 case StatusCodes::CREATED:
                     // Intentional fall-through.
                 case StatusCodes::OK:
