@@ -1,5 +1,5 @@
 <?php
-namespace Folksaurus;
+namespace PholksaurusLib;
 
 /**
  * Term representation that includes only the name and ID.

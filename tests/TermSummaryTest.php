@@ -1,5 +1,5 @@
 <?php
-namespace Folksaurus;
+namespace PholksaurusLib;
 
 /**
  * Test class for TermSummary.
@@ -8,7 +8,7 @@ class TermSummaryTest extends \PHPUnit_Framework_TestCase
 {
     public function testGetCompleteTermReturnsResultsOfGetTermByFolksaurusIdCallOnTermManagerObject()
     {
-        $mockTermManager = $this->getMockBuilder('Folksaurus\TermManager')
+        $mockTermManager = $this->getMockBuilder('PholksaurusLib\TermManager')
             ->disableOriginalConstructor()
             ->getMock();
 

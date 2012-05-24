@@ -1,5 +1,5 @@
 <?php
-namespace Folksaurus;
+namespace PholksaurusLib;
 
 /**
  * Retrieve terms and keep the database in sync with Folksaurus.

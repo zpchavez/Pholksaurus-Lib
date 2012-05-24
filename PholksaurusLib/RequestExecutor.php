@@ -1,5 +1,5 @@
 <?php
-namespace Folksaurus;
+namespace PholksaurusLib;
 
 /**
  * Class for making requests to and receiving responses from Folksaurus.

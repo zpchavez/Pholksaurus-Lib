@@ -1,5 +1,5 @@
 <?php
-namespace Folksaurus;
+namespace PholksaurusLib;
 
 /**
  * Test class for RequestExecutor.

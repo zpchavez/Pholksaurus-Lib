@@ -1,5 +1,5 @@
 <?php
-namespace Folksaurus;
+namespace PholksaurusLib;
 
 /**
  * Representation of a term.
@@ -92,7 +92,7 @@ class Term
      * $values must contain the following keys:
      *
      * <pre>
-     * id (the Folksaurus-assigned ID)
+     * id (the PholksaurusLib-assigned ID)
      * name
      * scope_note
      * broader

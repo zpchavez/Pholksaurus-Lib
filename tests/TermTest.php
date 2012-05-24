@@ -1,5 +1,5 @@
 <?php
-namespace Folksaurus;
+namespace PholksaurusLib;
 
 /**
  * Test class for Term.
@@ -70,7 +70,7 @@ class TermTest extends \PHPUnit_Framework_TestCase
 
     public function testAccessorMethods()
     {
-        $mockTermManager = $this->getMockBuilder('Folksaurus\TermManager')
+        $mockTermManager = $this->getMockBuilder('PholksaurusLib\TermManager')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -110,7 +110,7 @@ class TermTest extends \PHPUnit_Framework_TestCase
 
     public function testGetPreferredOnNonpreferredTermCallsGetTermByFolksaurusIdOnApiObject()
     {
-        $mockTermManager = $this->getMockBuilder('Folksaurus\TermManager')
+        $mockTermManager = $this->getMockBuilder('PholksaurusLib\TermManager')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -128,7 +128,7 @@ class TermTest extends \PHPUnit_Framework_TestCase
 
     public function testGetPreferredOnPreferredTermReturnsItself()
     {
-        $mockTermManager = $this->getMockBuilder('Folksaurus\TermManager')
+        $mockTermManager = $this->getMockBuilder('PholksaurusLib\TermManager')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -139,7 +139,7 @@ class TermTest extends \PHPUnit_Framework_TestCase
 
     public function testGetPreferredOnUnsortedTermReturnsItself()
     {
-        $mockTermManager = $this->getMockBuilder('Folksaurus\TermManager')
+        $mockTermManager = $this->getMockBuilder('PholksaurusLib\TermManager')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -151,10 +151,10 @@ class TermTest extends \PHPUnit_Framework_TestCase
     public function testGetPreferredForAmbiguousTermReturnsArrayOfResultsOfGetByFolkIdCalls()
     {
         // If term is ambiguous, it returns an array of Term objects.
-        $mockTermManager = $this->getMockBuilder('Folksaurus\TermManager')
+        $mockTermManager = $this->getMockBuilder('PholksaurusLib\TermManager')
             ->disableOriginalConstructor()
             ->getMock();
-        $dummyTermManager = $this->getMockBuilder('Folksaurus\TermManager')
+        $dummyTermManager = $this->getMockBuilder('PholksaurusLib\TermManager')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -194,7 +194,7 @@ class TermTest extends \PHPUnit_Framework_TestCase
 
     public function testGetStatusReturnsPreferredIfTermHasRelationshipsOtherThanUse()
     {
-        $mockDataInterface = $this->getMock('Folksaurus\DataInterface');
+        $mockDataInterface = $this->getMock('PholksaurusLib\DataInterface');
         $termManager = new TermManager($mockDataInterface);
 
         $preferredTerm = new Term($this->_getPreferredTermArray(), $termManager);
@@ -204,7 +204,7 @@ class TermTest extends \PHPUnit_Framework_TestCase
 
     public function testGetStatusReturnsNonPreferredIfTermHasUseRelationships()
     {
-        $mockDataInterface = $this->getMock('Folksaurus\DataInterface');
+        $mockDataInterface = $this->getMock('PholksaurusLib\DataInterface');
         $termManager = new TermManager($mockDataInterface);
 
         $nonPreferredTerm = new Term($this->_getNonPreferredTermArray(), $termManager);
@@ -214,7 +214,7 @@ class TermTest extends \PHPUnit_Framework_TestCase
 
     public function testGetStatusReturnsUnsortedIfTermHasNoRelationships()
     {
-        $mockDataInterface = $this->getMock('Folksaurus\DataInterface');
+        $mockDataInterface = $this->getMock('PholksaurusLib\DataInterface');
         $termManager = new TermManager($mockDataInterface);
 
         $unsortedTerm = new Term($this->_getUnsortedTermArray(), $termManager);
@@ -224,7 +224,7 @@ class TermTest extends \PHPUnit_Framework_TestCase
 
     public function testIsAmbiguousReturnsTrueIfTermHasMoreThanOneUseRelationships()
     {
-        $mockDataInterface = $this->getMock('Folksaurus\DataInterface');
+        $mockDataInterface = $this->getMock('PholksaurusLib\DataInterface');
         $termManager = new TermManager($mockDataInterface);
 
         $preferredTerm = new Term($this->_getPreferredTermArray(), $termManager);

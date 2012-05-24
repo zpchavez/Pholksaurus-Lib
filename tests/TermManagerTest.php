@@ -1,5 +1,5 @@
 <?php
-namespace Folksaurus;
+namespace PholksaurusLib;
 
 /**
  * Test class for TermManager.
@@ -32,8 +32,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByAppIdForTermNotFoundInDbMakesNoRequestAndReturnsFalse()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -56,8 +56,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByAppIdForNonExpiredTermDoesNotMakeARequestOrUpdateTerm()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -91,8 +91,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByAppIdForModifiedExpiredTermMakesRequestAndUpdatesTerm()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -123,7 +123,7 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
         // Save latest term info.
         $mockDataInterface->expects($this->once())
             ->method('saveTerm')
-            ->with($this->isInstanceOf('Folksaurus\Term'));
+            ->with($this->isInstanceOf('PholksaurusLib\Term'));
 
         $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
 
@@ -139,8 +139,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGettingTermThatWasDeletedRemotelyCallsDeleteTermAndReturnsFalse()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -184,8 +184,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByAppIdForUnmodifiedExpiredTermMakesRequestAndUpdatesModTime()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -230,8 +230,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByAppIdForExpiredTermWithNoFolksaurusIdGetsByNameAndSavesTerm()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -262,7 +262,7 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
         // Save latest term info.
         $mockDataInterface->expects($this->once())
             ->method('saveTerm')
-            ->with($this->isInstanceOf('Folksaurus\Term'));
+            ->with($this->isInstanceOf('PholksaurusLib\Term'));
 
         $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
 
@@ -278,8 +278,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByFolksaurusIdForTermNotInDbMakesRequestAndSavesNewTermIfFound()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -297,7 +297,7 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
         // Save the term to the database.
         $mockDataInterface->expects($this->once())
             ->method('saveTerm')
-            ->with($this->isInstanceOf('Folksaurus\Term'));
+            ->with($this->isInstanceOf('PholksaurusLib\Term'));
 
         $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
         $term = $termManager->getTermByFolksaurusId(self::FOO_FOLKSAURUS_ID);
@@ -312,8 +312,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByFolksaurusIdForNonExpiredTermMakesNoRequestAndDoesNotUpdateTerm()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -344,8 +344,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByFolksaurusIdForExpiredModifiedTermMakesRequestAndUpdatesTerm()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -374,7 +374,7 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
         // Save latest term info.
         $mockDataInterface->expects($this->once())
             ->method('saveTerm')
-            ->with($this->isInstanceOf('Folksaurus\Term'));
+            ->with($this->isInstanceOf('PholksaurusLib\Term'));
 
         $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
         $term = $termManager->getTermByFolksaurusId(self::FOO_FOLKSAURUS_ID);
@@ -389,8 +389,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByFolksaurusIdForExpiredUnmodifiedTermMakesRequestButDoesNotUpdate()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -429,8 +429,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetOrCreateTermGetsTermFromDbIfItExistsAndIsCurrent()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -467,8 +467,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetOrCreateTermGetsLatestVersionOfTermIfItExistsInDbButIsPassedExpireTime()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -497,7 +497,7 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
         $mockDataInterface->expects($this->once())
             ->method('saveTerm')
-            ->with($this->isInstanceOf('Folksaurus\Term'));
+            ->with($this->isInstanceOf('PholksaurusLib\Term'));
 
         $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
         $term = $termManager->getOrCreateTerm('Foo');
@@ -511,8 +511,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetOrCreateTermGetsOrCreatesTermInFolksaurusThenAddsItToTheDb()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -528,7 +528,7 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
         $mockDataInterface->expects($this->once())
             ->method('saveTerm')
-            ->with($this->isInstanceOf('Folksaurus\Term'));
+            ->with($this->isInstanceOf('PholksaurusLib\Term'));
 
         $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
         $term = $termManager->getOrCreateTerm('Foo');
@@ -541,8 +541,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByNameGetsTermFromDbIfItExistsAndIsCurrent()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -579,8 +579,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByNameGetsLatestVersionOfTermIfItExistsInDbButIsPassedExpireTime()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -609,7 +609,7 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
         $mockDataInterface->expects($this->once())
             ->method('saveTerm')
-            ->with($this->isInstanceOf('Folksaurus\Term'));
+            ->with($this->isInstanceOf('PholksaurusLib\Term'));
 
         $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
         $term = $termManager->getTermByName('Foo');
@@ -623,8 +623,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByNameCreatesTermInDbIfItExistsInFolksaurusButNotTheDb()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -640,7 +640,7 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
         $mockDataInterface->expects($this->once())
             ->method('saveTerm')
-            ->with($this->isInstanceOf('Folksaurus\Term'));
+            ->with($this->isInstanceOf('PholksaurusLib\Term'));
 
         $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
         $term = $termManager->getTermByName('Foo');
@@ -653,8 +653,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTermByNameReturnsFalseIfNotFoundInDbOrFolksaurus()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -679,8 +679,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetOrCreateTermCreatesTermLocallyIfUnableToCreateItInFolksaurus()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -696,7 +696,7 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
         $mockDataInterface->expects($this->once())
             ->method('saveTerm')
-            ->with($this->isInstanceOf('Folksaurus\Term'));
+            ->with($this->isInstanceOf('PholksaurusLib\Term'));
 
         $termManager = new TermManager($mockDataInterface, CONFIG_PATH, $mockRex);
         $term = $termManager->getOrCreateTerm('Foo');
@@ -708,8 +708,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetOrCreateOnRemotelyDeletedTermInDbReturnsFalseAndCallsDeleteTerm()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -746,8 +746,8 @@ class TermManagerTest extends \PHPUnit_Framework_TestCase
 
     public function testGetOrCreateOnRemotelyDeletedTermNotinDbReturnsFalseAndDoesNotSaveTerm()
     {
-        $mockDataInterface  = $this->getMock('Folksaurus\DataInterface');
-        $mockRex = $this->getMockBuilder('Folksaurus\RequestExecutor')
+        $mockDataInterface  = $this->getMock('PholksaurusLib\DataInterface');
+        $mockRex = $this->getMockBuilder('PholksaurusLib\RequestExecutor')
             ->disableOriginalConstructor()
             ->getMock();
 
