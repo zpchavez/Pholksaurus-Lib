@@ -182,3 +182,9 @@ to know the result of a request you can do the following.
 ```php
 $statusCode = $termManager->getRequestExecutor()->getLatestResponseCode();
 ```
+
+Feedback
+========
+Please post bug reports and feature requests to the [issue tracker][].
+
+[issue tracker]:https://github.com/zpchavez/Pholksaurus-Lib/issues
