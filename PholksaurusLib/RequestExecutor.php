@@ -177,8 +177,8 @@ class RequestExecutor
      */
     public function getOrCreateTerm($name)
     {
-        // Since trying to PUT an existing term returns a 409 response with the
-        // JSON of the conflicting term, we can save a request by just attempting
+        // Since trying to PUT an existing term returns a 200 response with the
+        // JSON of the existing term, we can save a request by just attempting
         // a PUT and returning the output.
         $uri = sprintf(
             self::RES_TERM_BY_NAME,
