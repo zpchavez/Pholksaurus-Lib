@@ -28,27 +28,52 @@ class TermManager
     /**
      * Constructor.
      *
+     * The options array accepts the following:
+     * - configPath: the path to an alternate config file to use
+     * - configSection: the name of a section in the ini file from which to get values
+     * - rex: a PholksaurusLib\RequestExecutor object to use in place of the default.
+     *
      * @param DataInterface $dataInterface  An implementation of DataInterface.
-     * @param string $configFile         The relative path to the config file to use.
-     * @param RequestExecutor $rex       If not provided, an instance will be created
-     *                                   using api_key and api_url from the config file.
+     * @param array $options                See method description.
      * @throws Exception if config file could not be found or read or is missing
      *                   required values.
      */
-    public function __construct(DataInterface $dataInterface, $configFile = 'config.ini',
-                                RequestExecutor $rex = null)
+    public function __construct(DataInterface $dataInterface, array $options = array())
     {
-        $config = parse_ini_file($configFile);
+        $configPath = isset($options['configPath'])
+            ? $options['configPath']
+            : __DIR__ . '/config.ini';
+
+        $config = parse_ini_file($configPath, true);
         if (!$config) {
-            throw new Exception('Failed to read config file: ' . $configFile);
+            throw new Exception('Failed to read config file: ' . $configPath);
         }
+
+        if (isset($options['configSection'])) {
+            if (!isset($config[$options['configSection']])) {
+                throw new Exception(
+                    sprintf(
+                        'Section "%s" not found in ini file.',
+                        $options['configSection']
+                    )
+                );
+            }
+            $configValues = $config[$options['configSection']];
+        } else {
+            // Filter out sections.
+            $configValues = array_filter(
+                $config,
+                function($v) {return !is_array($v);}
+            );
+        }
+
         $requiredKeys = array(
             'api_key',
             'api_url'
         );
         $missingKeys = array_diff(
             $requiredKeys,
-            array_keys($config)
+            array_keys($configValues)
         );
         if ($missingKeys) {
             throw new Exception(
@@ -57,13 +82,11 @@ class TermManager
             );
         }
 
-        if ($rex === null) {
-            $rex = new RequestExecutor(
-                $config['api_key'],
-                $config['api_url']
-            );
-        }
-        $this->_config        = $config;
+        $rex = isset($options['rex']) && ($options['rex'] instanceof RequestExecutor)
+            ? $options['rex']
+            : new RequestExecutor($configValues['api_key'], $configValues['api_url']);
+
+        $this->_config        = $configValues;
         $this->_dataInterface = $dataInterface;
         $this->_rex           = $rex;
     }
@@ -180,6 +203,16 @@ class TermManager
     public function getRequestExecutor()
     {
         return $this->_rex;
+    }
+
+    /**
+     * Get the array of configuration values parsed from the config file.
+     *
+     * @return array
+     */
+    public function getConfig()
+    {
+        return $this->_config;
     }
 
     /**
